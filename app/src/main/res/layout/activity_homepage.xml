@@ -81,13 +81,13 @@
             android:textSize="12sp" />
 
         <Button
-            android:id="@+id/btnReels"
+            android:id="@+id/btnHome"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:maxLines="1"
-            android:text="Reels"
+            android:text="Marketplace"
             android:textSize="12sp" />
 
         <Button
@@ -97,7 +97,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:maxLines="1"
-            android:text="Post"
+            android:text="Create Post"
             android:textSize="12sp" />
     </LinearLayout>
 </LinearLayout>
