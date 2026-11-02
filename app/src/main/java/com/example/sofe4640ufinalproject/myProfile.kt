@@ -12,6 +12,14 @@ import com.google.firebase.auth.FirebaseAuth
 class myProfile : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
+        val btnLogout = findViewById<Button>(R.id.btnLogout)
+
+        btnLogout.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
