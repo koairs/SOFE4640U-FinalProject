@@ -14,7 +14,7 @@
         android:layout_margin="5dp"
         android:background="@null"
         android:scaleType="fitCenter"
-        android:src="@drawable/Profile"
+        android:src="@drawable/profile"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
