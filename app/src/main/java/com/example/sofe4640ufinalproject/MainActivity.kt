@@ -62,11 +62,10 @@ class MainActivity : AppCompatActivity() {
                 }
         }
 
-        //commented till I create signup page
 
-      //  tvGoToSignUp.setOnClickListener {
-       //     startActivity(Intent(this, SignUpActivity::class.java))
-     //   }
+        tvGoToSignUp.setOnClickListener {
+            startActivity(Intent(this, SignUpActivity::class.java))
+        }
     }
 
     private fun goToHome() {

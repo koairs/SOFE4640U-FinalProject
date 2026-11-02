@@ -7,4 +7,12 @@
     android:layout_height="match_parent"
     tools:context=".myProfile">
 
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Log out"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="678dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
