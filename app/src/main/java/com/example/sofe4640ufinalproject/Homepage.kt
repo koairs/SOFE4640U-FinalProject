@@ -57,7 +57,7 @@ class Homepage : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        ListingStore.loadAll {
+        ListingStore.loadAll(this) {
             allListings = it
             applyFilter()
         }

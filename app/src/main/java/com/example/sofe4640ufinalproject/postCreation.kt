@@ -32,6 +32,7 @@ class postCreation : AppCompatActivity() {
             if (valid) {
                 btnSubmit.isEnabled = false
                 ListingStore.add(
+                    this,
                     etTitle.text.toString().trim(),
                     etPrice.text.toString().trim(),
                     etCategory.text.toString().trim()
@@ -41,7 +42,7 @@ class postCreation : AppCompatActivity() {
                         finish()
                     } else {
                         btnSubmit.isEnabled = true
-                        Toast.makeText(this, "Save failed. Check internet and Firestore setup.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "Save failed. Please try again.", Toast.LENGTH_LONG).show()
                     }
                 }
             }

@@ -31,6 +31,6 @@ class myListings : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        ListingStore.loadMine { adapter.update(it) }
+        ListingStore.loadMine(this) { adapter.update(it) }
     }
 }

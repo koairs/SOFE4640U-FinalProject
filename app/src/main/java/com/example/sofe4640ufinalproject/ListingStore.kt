@@ -1,41 +1,85 @@
 package com.example.sofe4640ufinalproject
 
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import android.content.ContentValues
+import android.content.Context
+import android.database.Cursor
 
 object ListingStore {
-    private val db = FirebaseFirestore.getInstance()
 
-    private fun uid(): String =
-        FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
+    // No login system yet, so every listing belongs to "guest"
+    private const val CURRENT_USER = "guest"
 
-    fun add(title: String, price: String, category: String, onDone: (Boolean) -> Unit) {
-        val listing = Listing(
-            title = title,
-            price = "\$$price",
-            category = category,
-            distance = "Nearby",
-            ownerId = uid(),
-            createdAt = System.currentTimeMillis()
-        )
-        db.collection("listings").add(listing)
-            .addOnSuccessListener { onDone(true) }
-            .addOnFailureListener { onDone(false) }
+    fun add(
+        context: Context,
+        title: String,
+        price: String,
+        category: String,
+        onDone: (Boolean) -> Unit
+    ) {
+        try {
+            val values = ContentValues().apply {
+                put("title", title)
+                put("price", "\$$price")
+                put("category", category)
+                put("distance", "Nearby")
+                put("owner_id", CURRENT_USER)
+                put("created_at", System.currentTimeMillis())
+            }
+            val db = DatabaseHelper.getInstance(context).writableDatabase
+            val rowId = db.insert(DatabaseHelper.TABLE_LISTINGS, null, values)
+            onDone(rowId != -1L)
+        } catch (e: Exception) {
+            onDone(false)
+        }
     }
 
-    fun loadAll(onResult: (List<Listing>) -> Unit) {
-        db.collection("listings").get()
-            .addOnSuccessListener { snap ->
-                onResult(snap.toObjects(Listing::class.java).sortedByDescending { it.createdAt })
-            }
-            .addOnFailureListener { onResult(emptyList()) }
+    fun loadAll(context: Context, onResult: (List<Listing>) -> Unit) {
+        try {
+            val db = DatabaseHelper.getInstance(context).readableDatabase
+            val cursor = db.query(
+                DatabaseHelper.TABLE_LISTINGS,
+                null, null, null, null, null,
+                "created_at DESC"
+            )
+            onResult(readListings(cursor))
+        } catch (e: Exception) {
+            onResult(emptyList())
+        }
     }
 
-    fun loadMine(onResult: (List<Listing>) -> Unit) {
-        db.collection("listings").whereEqualTo("ownerId", uid()).get()
-            .addOnSuccessListener { snap ->
-                onResult(snap.toObjects(Listing::class.java).sortedByDescending { it.createdAt })
+    fun loadMine(context: Context, onResult: (List<Listing>) -> Unit) {
+        try {
+            val db = DatabaseHelper.getInstance(context).readableDatabase
+            val cursor = db.query(
+                DatabaseHelper.TABLE_LISTINGS,
+                null,
+                "owner_id = ?",
+                arrayOf(CURRENT_USER),
+                null, null,
+                "created_at DESC"
+            )
+            onResult(readListings(cursor))
+        } catch (e: Exception) {
+            onResult(emptyList())
+        }
+    }
+
+    private fun readListings(cursor: Cursor): List<Listing> {
+        val list = mutableListOf<Listing>()
+        cursor.use {
+            while (it.moveToNext()) {
+                list.add(
+                    Listing(
+                        title = it.getString(it.getColumnIndexOrThrow("title")),
+                        price = it.getString(it.getColumnIndexOrThrow("price")),
+                        category = it.getString(it.getColumnIndexOrThrow("category")),
+                        distance = it.getString(it.getColumnIndexOrThrow("distance")),
+                        ownerId = it.getString(it.getColumnIndexOrThrow("owner_id")),
+                        createdAt = it.getLong(it.getColumnIndexOrThrow("created_at"))
+                    )
+                )
             }
-            .addOnFailureListener { onResult(emptyList()) }
+        }
+        return list
     }
 }
