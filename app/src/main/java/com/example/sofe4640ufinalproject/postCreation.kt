@@ -1,8 +1,10 @@
 package com.example.sofe4640ufinalproject
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -46,6 +48,20 @@ class postCreation : AppCompatActivity() {
                     }
                 }
             }
+        }
+
+
+        findViewById<Button>(R.id.btnMessages).setOnClickListener {
+            startActivity(Intent(this, Messages::class.java))
+        }
+        findViewById<Button>(R.id.btnMyListings).setOnClickListener {
+            startActivity(Intent(this, myListings::class.java))
+        }
+        findViewById<Button>(R.id.btnHome).setOnClickListener {
+            startActivity(Intent(this, Homepage::class.java))
+        }
+        findViewById<Button>(R.id.btnPost).setOnClickListener {
+            startActivity(Intent(this, postCreation::class.java))
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
