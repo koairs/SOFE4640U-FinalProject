@@ -7,4 +7,14 @@
     android:layout_height="match_parent"
     tools:context=".Homepage">
 
+    <ImageButton
+        android:id="@+id/profileButton"
+        android:layout_width="76dp"
+        android:layout_height="112dp"
+        android:background="@null"
+        android:scaleType="fitCenter"
+        android:src="@drawable/Profile"
+        android:layout_margin="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
