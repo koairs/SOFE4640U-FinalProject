@@ -4,6 +4,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bg_main"
     android:fillViewport="true">
 
     <LinearLayout
@@ -18,6 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="48dp"
             android:text="Create Account"
+            android:textColor="@color/primary"
             android:textSize="28sp"
             android:textStyle="bold" />
 
@@ -25,20 +27,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Sign up to get started" />
+            android:text="Sign up to get started"
+            android:textColor="@color/text_secondary" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:hint="Email">
+            android:hint="Email"
+            android:textColorHint="@color/text_secondary"
+            app:boxBackgroundColor="@color/surface"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxStrokeColor="@color/accent"
+            app:hintTextColor="@color/accent_dark">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress" />
+                android:inputType="textEmailAddress"
+                android:textColor="@color/text_primary" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -47,13 +59,23 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="Password (6+ characters)"
-            app:endIconMode="password_toggle">
+            android:textColorHint="@color/text_secondary"
+            app:boxBackgroundColor="@color/surface"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxStrokeColor="@color/accent"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/text_secondary"
+            app:hintTextColor="@color/accent_dark">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:textColor="@color/text_primary" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -62,13 +84,23 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="Confirm password"
-            app:endIconMode="password_toggle">
+            android:textColorHint="@color/text_secondary"
+            app:boxBackgroundColor="@color/surface"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxStrokeColor="@color/accent"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/text_secondary"
+            app:hintTextColor="@color/accent_dark">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etConfirm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:textColor="@color/text_primary" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
@@ -76,7 +108,12 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="24dp"
-            android:text="Sign Up" />
+            android:text="Sign Up"
+            android:textColor="@color/surface"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="16dp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -87,14 +124,15 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Already have an account? " />
+                android:text="Already have an account? "
+                android:textColor="@color/text_secondary" />
 
             <TextView
                 android:id="@+id/tvGoToLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Log In"
-                android:textColor="?attr/colorPrimary"
+                android:textColor="@color/accent_dark"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>

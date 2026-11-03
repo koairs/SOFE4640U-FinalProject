@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bg_main"
     android:orientation="vertical"
     tools:context=".Messages">
 
@@ -12,16 +13,18 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/primary"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp">
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="12dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Messages"
+            android:textColor="@color/surface"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -31,6 +34,7 @@
             android:layout_height="48dp"
             android:background="@null"
             android:contentDescription="Profile"
+            android:padding="4dp"
             android:scaleType="fitCenter"
             android:src="@drawable/profile" />
     </LinearLayout>
@@ -41,15 +45,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"
-        android:hint="Search messages or items">
+        android:hint="Search messages or items"
+        android:textColorHint="@color/text_secondary"
+        app:boxBackgroundColor="@color/surface"
+        app:boxCornerRadiusBottomEnd="16dp"
+        app:boxCornerRadiusBottomStart="16dp"
+        app:boxCornerRadiusTopEnd="16dp"
+        app:boxCornerRadiusTopStart="16dp"
+        app:boxStrokeColor="@color/accent"
+        app:hintTextColor="@color/accent_dark">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etSearchMessages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:textColor="@color/text_primary" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Filter Chips for Marketplace Messages -->
@@ -74,28 +88,48 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="All" />
+                android:text="All"
+                android:textColor="@color/chip_text"
+                app:checkedIconTint="@color/primary"
+                app:chipBackgroundColor="@color/chip_bg"
+                app:chipStrokeColor="@color/divider"
+                app:chipStrokeWidth="1dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipBuying"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Buying" />
+                android:text="Buying"
+                android:textColor="@color/chip_text"
+                app:checkedIconTint="@color/primary"
+                app:chipBackgroundColor="@color/chip_bg"
+                app:chipStrokeColor="@color/divider"
+                app:chipStrokeWidth="1dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipSelling"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Selling" />
+                android:text="Selling"
+                android:textColor="@color/chip_text"
+                app:checkedIconTint="@color/primary"
+                app:chipBackgroundColor="@color/chip_bg"
+                app:chipStrokeColor="@color/divider"
+                app:chipStrokeWidth="1dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipUnread"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Unread" />
+                android:text="Unread"
+                android:textColor="@color/chip_text"
+                app:checkedIconTint="@color/primary"
+                app:chipBackgroundColor="@color/chip_bg"
+                app:chipStrokeColor="@color/divider"
+                app:chipStrokeWidth="1dp" />
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 
@@ -105,14 +139,19 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingHorizontal="12dp"
         android:paddingTop="4dp" />
 
     <!-- Bottom Navigation -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:background="@color/primary"
+        android:orientation="horizontal"
+        android:paddingVertical="6dp">
 
+        <!-- Current screen: highlighted -->
         <Button
             android:id="@+id/btnMessages"
             style="@style/Widget.Material3.Button.TextButton"
@@ -121,7 +160,9 @@
             android:layout_weight="1"
             android:maxLines="1"
             android:text="Messages"
-            android:textSize="12sp" />
+            android:textColor="@color/accent_light"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnMyListings"
@@ -131,6 +172,7 @@
             android:layout_weight="1"
             android:maxLines="1"
             android:text="My Listings"
+            android:textColor="@color/nav_inactive"
             android:textSize="12sp" />
 
         <Button
@@ -141,6 +183,7 @@
             android:layout_weight="1"
             android:maxLines="1"
             android:text="Marketplace"
+            android:textColor="@color/nav_inactive"
             android:textSize="12sp" />
 
         <Button
@@ -151,6 +194,7 @@
             android:layout_weight="1"
             android:maxLines="1"
             android:text="Create Post"
+            android:textColor="@color/nav_inactive"
             android:textSize="12sp" />
     </LinearLayout>
 
