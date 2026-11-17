@@ -10,15 +10,17 @@ class DatabaseHelper private constructor(context: Context) :
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             """
-            CREATE TABLE $TABLE_LISTINGS (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                price TEXT NOT NULL,
-                category TEXT NOT NULL,
-                distance TEXT NOT NULL,
-                owner_id TEXT NOT NULL,
-                created_at INTEGER NOT NULL
-            )
+        CREATE TABLE $TABLE_LISTINGS (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        price TEXT NOT NULL,
+        category TEXT NOT NULL,
+        distance TEXT NOT NULL,
+        owner_id TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        media_uri TEXT,
+        media_type TEXT
+)
             """.trimIndent()
         )
     }
@@ -30,7 +32,7 @@ class DatabaseHelper private constructor(context: Context) :
 
     companion object {
         const val DB_NAME = "marketplace.db"
-        const val DB_VERSION = 1
+        const val DB_VERSION = 2
         const val TABLE_LISTINGS = "listings"
 
         @Volatile

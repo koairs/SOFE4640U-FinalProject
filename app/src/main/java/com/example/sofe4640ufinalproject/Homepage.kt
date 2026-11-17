@@ -29,6 +29,7 @@ class Homepage : AppCompatActivity() {
         rv.layoutManager = LinearLayoutManager(this)
         rv.adapter = adapter
 
+
         etSearch = findViewById(R.id.etSearch)
         etSearch.doOnTextChanged { _, _, _, _ -> applyFilter() }
 

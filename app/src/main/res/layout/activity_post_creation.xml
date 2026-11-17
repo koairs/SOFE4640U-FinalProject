@@ -9,7 +9,7 @@
     android:orientation="vertical"
     tools:context=".postCreation">
 
-    <!-- Header -->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Scrollable form takes all remaining space above the bottom bar -->
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -134,16 +134,84 @@
                     android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
-                android:id="@+id/btnAddMedia"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Add Photo / Video"
-                android:textColor="@color/accent_dark"
-                app:cornerRadius="16dp"
-                app:strokeColor="@color/accent" />
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnTakePhoto"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:text="Photo"
+                    android:textColor="@color/accent_dark"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="@color/accent" />
+
+                <Button
+                    android:id="@+id/btnRecordVideo"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginHorizontal="4dp"
+                    android:layout_weight="1"
+                    android:text="Video"
+                    android:textColor="@color/accent_dark"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="@color/accent" />
+
+                <Button
+                    android:id="@+id/btnGallery"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:text="Gallery"
+                    android:textColor="@color/accent_dark"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="@color/accent" />
+            </LinearLayout>
+
+
+            <FrameLayout
+                android:id="@+id/previewContainer"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/surface"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/ivPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Media preview"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:id="@+id/tvVideoBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="▶"
+                    android:textColor="@color/surface"
+                    android:textSize="48sp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btnRemoveMedia"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:text="Remove"
+                    android:textColor="@color/surface" />
+            </FrameLayout>
 
             <Button
                 android:id="@+id/btnSubmitListing"
@@ -200,7 +268,7 @@
             android:textColor="@color/nav_inactive"
             android:textSize="12sp" />
 
-        <!-- Current screen: highlighted -->
+
         <Button
             android:id="@+id/btnPost"
             style="@style/Widget.Material3.Button.TextButton"

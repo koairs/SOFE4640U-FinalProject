@@ -14,6 +14,8 @@ object ListingStore {
         title: String,
         price: String,
         category: String,
+        mediaUri: String?,
+        mediaType: String?,
         onDone: (Boolean) -> Unit
     ) {
         try {
@@ -24,6 +26,8 @@ object ListingStore {
                 put("distance", "Nearby")
                 put("owner_id", CURRENT_USER)
                 put("created_at", System.currentTimeMillis())
+                put("media_uri", mediaUri)
+                put("media_type", mediaType)
             }
             val db = DatabaseHelper.getInstance(context).writableDatabase
             val rowId = db.insert(DatabaseHelper.TABLE_LISTINGS, null, values)
@@ -70,12 +74,15 @@ object ListingStore {
             while (it.moveToNext()) {
                 list.add(
                     Listing(
+                        id = it.getLong(it.getColumnIndexOrThrow("id")),
                         title = it.getString(it.getColumnIndexOrThrow("title")),
                         price = it.getString(it.getColumnIndexOrThrow("price")),
                         category = it.getString(it.getColumnIndexOrThrow("category")),
                         distance = it.getString(it.getColumnIndexOrThrow("distance")),
                         ownerId = it.getString(it.getColumnIndexOrThrow("owner_id")),
-                        createdAt = it.getLong(it.getColumnIndexOrThrow("created_at"))
+                        createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
+                        mediaUri = it.getString(it.getColumnIndexOrThrow("media_uri")),
+                        mediaType = it.getString(it.getColumnIndexOrThrow("media_type"))
                     )
                 )
             }
