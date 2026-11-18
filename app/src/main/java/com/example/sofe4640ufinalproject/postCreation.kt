@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -158,6 +159,9 @@ class postCreation : AppCompatActivity() {
         previewContainer.visibility = View.VISIBLE
         tvVideoBadge.visibility = if (type == "video") View.VISIBLE else View.GONE
         Glide.with(this).load(uri).centerCrop().into(ivPreview)
+        findViewById<View>(R.id.svPostCreation)?.post {
+            (findViewById<View>(R.id.svPostCreation) as? ScrollView)?.fullScroll(View.FOCUS_DOWN)
+        }
     }
 
     private fun clearMedia() {
