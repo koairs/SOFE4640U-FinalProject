@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -18,14 +19,27 @@
         android:paddingHorizontal="20dp"
         android:paddingVertical="16dp">
 
-        <TextView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="My Listings"
-            android:textColor="@color/surface"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="My Listings"
+                android:textColor="@color/surface"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Manage your active posts"
+                android:textColor="@color/nav_inactive"
+                android:textSize="12sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Listings -->
@@ -35,8 +49,9 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingHorizontal="12dp"
-        android:paddingTop="12dp" />
+        android:paddingHorizontal="10dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp" />
 
     <!-- Bottom Navigation -->
     <LinearLayout
@@ -44,9 +59,9 @@
         android:layout_height="wrap_content"
         android:background="@color/primary"
         android:orientation="horizontal"
-        android:paddingVertical="6dp">
+        android:paddingVertical="8dp">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnMessages"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="0dp"
@@ -55,10 +70,14 @@
             android:maxLines="1"
             android:text="Messages"
             android:textColor="@color/nav_inactive"
-            android:textSize="12sp" />
+            android:textSize="11sp"
+            app:icon="@drawable/ic_messages"
+            app:iconGravity="top"
+            app:iconPadding="2dp"
+            app:iconSize="20dp"
+            app:iconTint="@color/nav_inactive" />
 
-        <!-- Current screen: highlighted -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnMyListings"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="0dp"
@@ -67,10 +86,15 @@
             android:maxLines="1"
             android:text="My Listings"
             android:textColor="@color/accent_light"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:icon="@drawable/ic_my_listings"
+            app:iconGravity="top"
+            app:iconPadding="2dp"
+            app:iconSize="20dp"
+            app:iconTint="@color/accent_light" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnHome"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="0dp"
@@ -79,9 +103,14 @@
             android:maxLines="1"
             android:text="Marketplace"
             android:textColor="@color/nav_inactive"
-            android:textSize="12sp" />
+            android:textSize="11sp"
+            app:icon="@drawable/ic_home"
+            app:iconGravity="top"
+            app:iconPadding="2dp"
+            app:iconSize="20dp"
+            app:iconTint="@color/nav_inactive" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPost"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="0dp"
@@ -90,6 +119,11 @@
             android:maxLines="1"
             android:text="Create Post"
             android:textColor="@color/nav_inactive"
-            android:textSize="12sp" />
+            android:textSize="11sp"
+            app:icon="@drawable/ic_post"
+            app:iconGravity="top"
+            app:iconPadding="2dp"
+            app:iconSize="20dp"
+            app:iconTint="@color/nav_inactive" />
     </LinearLayout>
 </LinearLayout>
