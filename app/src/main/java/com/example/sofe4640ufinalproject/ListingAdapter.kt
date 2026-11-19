@@ -54,6 +54,7 @@ class ListingAdapter(private var items: List<Listing>) :
                     putExtra("category", item.category)
                     putExtra("mediaUri", item.mediaUri)
                     putExtra("mediaType", item.mediaType)
+                    putExtra("ownerId", item.ownerId)
                 }
             )
         }

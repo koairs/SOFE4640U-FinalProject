@@ -3,11 +3,14 @@ package com.example.sofe4640ufinalproject
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import com.google.firebase.auth.FirebaseAuth
 
 object ListingStore {
 
-    // No login system yet, so every listing belongs to "guest"
-    private const val CURRENT_USER = "guest"
+    fun currentUserId(): String {
+        val user = FirebaseAuth.getInstance().currentUser
+        return user?.email?.ifBlank { null } ?: user?.uid ?: "guest"
+    }
 
     fun add(
         context: Context,
@@ -21,10 +24,10 @@ object ListingStore {
         try {
             val values = ContentValues().apply {
                 put("title", title)
-                put("price", "\$$price")
+                put("price", if (price.startsWith("$")) price else "\$$price")
                 put("category", category)
                 put("distance", "Nearby")
-                put("owner_id", CURRENT_USER)
+                put("owner_id", currentUserId())
                 put("created_at", System.currentTimeMillis())
                 put("media_uri", mediaUri)
                 put("media_type", mediaType)
@@ -58,7 +61,7 @@ object ListingStore {
                 DatabaseHelper.TABLE_LISTINGS,
                 null,
                 "owner_id = ?",
-                arrayOf(CURRENT_USER),
+                arrayOf(currentUserId()),
                 null, null,
                 "created_at DESC"
             )

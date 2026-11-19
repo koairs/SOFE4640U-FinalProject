@@ -32,6 +32,7 @@ class ListingDetailActivity : AppCompatActivity() {
         val category = intent.getStringExtra("category") ?: ""
         val mediaUriStr = intent.getStringExtra("mediaUri")
         val mediaType = intent.getStringExtra("mediaType")
+        val ownerId = intent.getStringExtra("ownerId") ?: "Seller"
 
         val tvTitle = findViewById<TextView>(R.id.tvDetailTitle)
         val tvPrice = findViewById<TextView>(R.id.tvDetailPrice)
@@ -67,7 +68,11 @@ class ListingDetailActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnContactSeller)?.setOnClickListener {
-            startActivity(Intent(this, Messages::class.java))
+            val intent = Intent(this, ChatActivity::class.java).apply {
+                putExtra("otherUser", ownerId)
+                putExtra("itemTitle", title)
+            }
+            startActivity(intent)
         }
     }
 }

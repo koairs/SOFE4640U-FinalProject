@@ -11,29 +11,43 @@ class DatabaseHelper private constructor(context: Context) :
         db.execSQL(
             """
         CREATE TABLE $TABLE_LISTINGS (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        price TEXT NOT NULL,
-        category TEXT NOT NULL,
-        distance TEXT NOT NULL,
-        owner_id TEXT NOT NULL,
-        created_at INTEGER NOT NULL,
-        media_uri TEXT,
-        media_type TEXT
-)
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            price TEXT NOT NULL,
+            category TEXT NOT NULL,
+            distance TEXT NOT NULL,
+            owner_id TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            media_uri TEXT,
+            media_type TEXT
+        )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+        CREATE TABLE $TABLE_MESSAGES (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sender_id TEXT NOT NULL,
+            receiver_id TEXT NOT NULL,
+            item_title TEXT,
+            message_text TEXT NOT NULL,
+            timestamp INTEGER NOT NULL
+        )
             """.trimIndent()
         )
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_LISTINGS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_MESSAGES")
         onCreate(db)
     }
 
     companion object {
         const val DB_NAME = "marketplace.db"
-        const val DB_VERSION = 2
+        const val DB_VERSION = 3
         const val TABLE_LISTINGS = "listings"
+        const val TABLE_MESSAGES = "messages"
 
         @Volatile
         private var instance: DatabaseHelper? = null
