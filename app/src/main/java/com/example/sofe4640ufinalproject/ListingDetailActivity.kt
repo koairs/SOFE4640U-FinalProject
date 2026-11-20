@@ -23,8 +23,13 @@ import java.io.File
 
 class ListingDetailActivity : AppCompatActivity() {
 
+    private lateinit var listingId: String
     private lateinit var ownerId: String
     private lateinit var me: String
+    private lateinit var currentTitle: String
+    private lateinit var currentDesc: String
+    private lateinit var currentPrice: String
+    private lateinit var currentCategory: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,23 +42,27 @@ class ListingDetailActivity : AppCompatActivity() {
             insets
         }
 
-        val title = intent.getStringExtra("title") ?: "Listing Detail"
-        val price = intent.getStringExtra("price") ?: ""
-        val category = intent.getStringExtra("category") ?: ""
+        listingId = intent.getStringExtra("listingId") ?: ""
+        currentTitle = intent.getStringExtra("title") ?: "Listing Detail"
+        currentDesc = intent.getStringExtra("description") ?: ""
+        currentPrice = intent.getStringExtra("price") ?: ""
+        currentCategory = intent.getStringExtra("category") ?: ""
         val mediaUriStr = intent.getStringExtra("mediaUri")
         val mediaType = intent.getStringExtra("mediaType")
         ownerId = intent.getStringExtra("ownerId") ?: "Seller"
         me = ListingStore.currentUserId()
 
         val tvTitle = findViewById<TextView>(R.id.tvDetailTitle)
+        val tvDescription = findViewById<TextView>(R.id.tvDetailDescription)
         val tvPrice = findViewById<TextView>(R.id.tvDetailPrice)
         val tvCategory = findViewById<TextView>(R.id.tvDetailCategory)
         val ivDetail = findViewById<ImageView>(R.id.ivDetail)
         val vvDetail = findViewById<VideoView>(R.id.vvDetail)
 
-        tvTitle.text = title
-        tvPrice.text = price
-        tvCategory.text = category
+        tvTitle.text = currentTitle
+        tvDescription.text = currentDesc.ifBlank { "No description provided." }
+        tvPrice.text = currentPrice
+        tvCategory.text = currentCategory
 
         if (!mediaUriStr.isNullOrBlank()) {
             val uri = Uri.parse(mediaUriStr)
@@ -76,18 +85,38 @@ class ListingDetailActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.btnBack)?.setOnClickListener { finish() }
 
+        val layoutOwner = findViewById<View>(R.id.layoutOwnerActions)
+        val layoutBuyer = findViewById<View>(R.id.layoutBuyerActions)
+        val btnRate = findViewById<Button>(R.id.btnRateSeller)
+
+        if (ownerId == me) {
+            layoutOwner.visibility = View.VISIBLE
+            layoutBuyer.visibility = View.GONE
+            btnRate.visibility = View.GONE
+        } else {
+            layoutOwner.visibility = View.GONE
+            layoutBuyer.visibility = View.VISIBLE
+            btnRate.visibility = View.VISIBLE
+        }
+
         findViewById<Button>(R.id.btnContactSeller)?.setOnClickListener {
             val chat = Intent(this, ChatActivity::class.java).apply {
                 putExtra("otherUser", ownerId)
-                putExtra("itemTitle", title)
+                putExtra("itemTitle", currentTitle)
             }
             startActivity(chat)
         }
 
+        findViewById<Button>(R.id.btnEditListing)?.setOnClickListener {
+            showEditDialog()
+        }
+
+        findViewById<Button>(R.id.btnDeleteListing)?.setOnClickListener {
+            showDeleteDialog()
+        }
+
         findViewById<TextView>(R.id.tvSellerName).text = ownerId.substringBefore("@")
 
-        val btnRate = findViewById<Button>(R.id.btnRateSeller)
-        if (ownerId == me) btnRate.visibility = View.GONE
         btnRate.setOnClickListener {
             RatingStore.hasInteracted(this, me, ownerId) { interacted ->
                 if (!interacted) {
@@ -117,6 +146,65 @@ class ListingDetailActivity : AppCompatActivity() {
                 iv.setImageResource(R.drawable.profile)
             }
         }
+    }
+
+    private fun showEditDialog() {
+        val etTitle = EditText(this).apply { setText(currentTitle); hint = "Title" }
+        val etDesc = EditText(this).apply { setText(currentDesc); hint = "Description" }
+        val etPrice = EditText(this).apply { setText(currentPrice); hint = "Price" }
+        val etCat = EditText(this).apply { setText(currentCategory); hint = "Category" }
+
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 24, 48, 0)
+            addView(etTitle)
+            addView(etDesc)
+            addView(etPrice)
+            addView(etCat)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Edit Listing")
+            .setView(layout)
+            .setPositiveButton("Save") { _, _ ->
+                val newTitle = etTitle.text.toString().trim()
+                val newDesc = etDesc.text.toString().trim()
+                val newPrice = etPrice.text.toString().trim()
+                val newCat = etCat.text.toString().trim()
+                if (newTitle.isNotEmpty() && newPrice.isNotEmpty() && newCat.isNotEmpty()) {
+                    ListingStore.update(this, listingId, newTitle, newDesc, newPrice, newCat) { success ->
+                        Toast.makeText(this, if (success) "Listing updated" else "Update failed", Toast.LENGTH_SHORT).show()
+                        if (success) {
+                            currentTitle = newTitle
+                            currentDesc = newDesc
+                            currentPrice = newPrice
+                            currentCategory = newCat
+                            findViewById<TextView>(R.id.tvDetailTitle).text = newTitle
+                            findViewById<TextView>(R.id.tvDetailDescription).text = newDesc.ifBlank { "No description provided." }
+                            findViewById<TextView>(R.id.tvDetailPrice).text = newPrice
+                            findViewById<TextView>(R.id.tvDetailCategory).text = newCat
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, "Please fill required fields", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showDeleteDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Listing")
+            .setMessage("Are you sure you want to delete this listing?")
+            .setPositiveButton("Delete") { _, _ ->
+                ListingStore.delete(this, listingId) { success ->
+                    Toast.makeText(this, if (success) "Listing deleted" else "Delete failed", Toast.LENGTH_SHORT).show()
+                    if (success) finish()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun showRateDialog() {

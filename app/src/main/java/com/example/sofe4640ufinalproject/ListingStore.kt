@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 
 object ListingStore {
@@ -17,6 +16,7 @@ object ListingStore {
     fun add(
         context: Context,
         title: String,
+        description: String,
         price: String,
         category: String,
         mediaUri: String?,
@@ -25,6 +25,7 @@ object ListingStore {
     ) {
         val data = mapOf(
             "title" to title,
+            "description" to description,
             "price" to if (price.startsWith("$")) price else "\$$price",
             "category" to category,
             "distance" to "Nearby",
@@ -45,15 +46,57 @@ object ListingStore {
             }
     }
 
+    fun update(
+        context: Context,
+        listingId: String,
+        title: String,
+        description: String,
+        price: String,
+        category: String,
+        onDone: (Boolean) -> Unit
+    ) {
+        val updates = mapOf(
+            "title" to title,
+            "description" to description,
+            "price" to if (price.startsWith("$")) price else "\$$price",
+            "category" to category
+        )
+        Firebase.firestore.collection("listings").document(listingId)
+            .update(updates)
+            .addOnSuccessListener {
+                onDone(true)
+            }
+            .addOnFailureListener { e ->
+                Log.e("ListingStore", "Update failed", e)
+                onDone(false)
+            }
+    }
+
+    fun delete(
+        context: Context,
+        listingId: String,
+        onDone: (Boolean) -> Unit
+    ) {
+        Firebase.firestore.collection("listings").document(listingId)
+            .delete()
+            .addOnSuccessListener {
+                onDone(true)
+            }
+            .addOnFailureListener { e ->
+                Log.e("ListingStore", "Delete failed", e)
+                onDone(false)
+            }
+    }
+
     fun loadAll(context: Context, onResult: (List<Listing>) -> Unit) {
         Firebase.firestore.collection("listings")
-            .orderBy("createdAt", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { result ->
                 val list = result.documents.mapNotNull { doc ->
                     Listing(
-                        id = doc.id.hashCode().toLong(),
+                        id = doc.id,
                         title = doc.getString("title") ?: "",
+                        description = doc.getString("description") ?: "",
                         price = doc.getString("price") ?: "",
                         category = doc.getString("category") ?: "",
                         distance = doc.getString("distance") ?: "",
@@ -62,7 +105,7 @@ object ListingStore {
                         mediaUri = doc.getString("mediaUri")?.ifBlank { null },
                         mediaType = doc.getString("mediaType")?.ifBlank { null }
                     )
-                }
+                }.sortedByDescending { it.createdAt }
                 onResult(list)
             }
             .addOnFailureListener { e ->
@@ -72,15 +115,16 @@ object ListingStore {
     }
 
     fun loadMine(context: Context, onResult: (List<Listing>) -> Unit) {
+        val current = currentUserId()
         Firebase.firestore.collection("listings")
-            .whereEqualTo("ownerId", currentUserId())
-            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .whereEqualTo("ownerId", current)
             .get()
             .addOnSuccessListener { result ->
                 val list = result.documents.mapNotNull { doc ->
                     Listing(
-                        id = doc.id.hashCode().toLong(),
+                        id = doc.id,
                         title = doc.getString("title") ?: "",
+                        description = doc.getString("description") ?: "",
                         price = doc.getString("price") ?: "",
                         category = doc.getString("category") ?: "",
                         distance = doc.getString("distance") ?: "",
@@ -89,7 +133,7 @@ object ListingStore {
                         mediaUri = doc.getString("mediaUri")?.ifBlank { null },
                         mediaType = doc.getString("mediaType")?.ifBlank { null }
                     )
-                }
+                }.sortedByDescending { it.createdAt }
                 onResult(list)
             }
             .addOnFailureListener { e ->

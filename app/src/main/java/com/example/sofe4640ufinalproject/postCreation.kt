@@ -63,6 +63,7 @@ class postCreation : AppCompatActivity() {
         setContentView(R.layout.activity_post_creation)
 
         val etTitle = findViewById<EditText>(R.id.etTitle)
+        val etDescription = findViewById<EditText>(R.id.etDescription)
         val etPrice = findViewById<EditText>(R.id.etPrice)
         val etCategory = findViewById<EditText>(R.id.etCategory)
         val btnSubmit = findViewById<Button>(R.id.btnSubmitListing)
@@ -95,13 +96,14 @@ class postCreation : AppCompatActivity() {
                 ListingStore.add(
                     this,
                     etTitle.text.toString().trim(),
+                    etDescription.text.toString().trim(),
                     etPrice.text.toString().trim(),
                     etCategory.text.toString().trim(),
                     mediaUri?.toString(),
                     mediaType
                 ) { success ->
                     if (success) {
-                        toast("Listing saved")
+                        toast("Listing published")
                         finish()
                     } else {
                         btnSubmit.isEnabled = true
@@ -131,8 +133,6 @@ class postCreation : AppCompatActivity() {
             insets
         }
     }
-
-
 
     private fun newMediaFile(ext: String): File {
         val dir = File(getExternalFilesDir(null), "media").apply { mkdirs() }

@@ -1,8 +1,9 @@
 package com.example.sofe4640ufinalproject
 
 data class Listing(
-    val id: Long = 0L,
+    val id: String = "",
     val title: String = "",
+    val description: String = "",
     val price: String = "",
     val category: String = "",
     val distance: String = "",

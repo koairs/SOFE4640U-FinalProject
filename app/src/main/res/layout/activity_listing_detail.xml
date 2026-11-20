@@ -229,8 +229,47 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Action Bar -->
+    <!-- Bottom Action Bar (Owner: Edit / Delete) -->
     <LinearLayout
+        android:id="@+id/layoutOwnerActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/surface"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEditListing"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="Edit"
+            android:textColor="@color/surface"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeleteListing"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Delete"
+            android:textColor="@color/surface"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#DC2626"
+            app:cornerRadius="16dp" />
+    </LinearLayout>
+
+    <!-- Bottom Action Bar (Buyer: Message Seller) -->
+    <LinearLayout
+        android:id="@+id/layoutBuyerActions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface"

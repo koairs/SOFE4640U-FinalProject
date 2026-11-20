@@ -53,7 +53,9 @@ class ListingAdapter(private var items: List<Listing>) :
             val ctx = it.context
             ctx.startActivity(
                 Intent(ctx, ListingDetailActivity::class.java).apply {
+                    putExtra("listingId", item.id)
                     putExtra("title", item.title)
+                    putExtra("description", item.description)
                     putExtra("price", item.price)
                     putExtra("category", item.category)
                     putExtra("mediaUri", item.mediaUri)
