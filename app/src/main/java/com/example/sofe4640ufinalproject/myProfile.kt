@@ -1,7 +1,6 @@
 package com.example.sofe4640ufinalproject
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
@@ -25,18 +24,13 @@ class myProfile : AppCompatActivity() {
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri == null) return@registerForActivityResult
-        val file = copyAvatar(uri)
-        if (file != null) {
-            ProfileStore.setPhoto(this, ListingStore.currentUserId(), file.absolutePath) { success ->
-                if (success) {
-                    loadAvatar()
-                    Toast.makeText(this, "Profile photo updated", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Couldn't save photo to cloud", Toast.LENGTH_SHORT).show()
-                }
+        ProfileStore.setPhoto(this, ListingStore.currentUserId(), uri) { success ->
+            if (success) {
+                loadAvatar()
+                Toast.makeText(this, "Profile photo updated & saved to cloud", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Couldn't save photo to cloud", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            Toast.makeText(this, "Couldn't use that photo", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -113,16 +107,5 @@ class myProfile : AppCompatActivity() {
                 ivAvatar.setImageResource(R.drawable.profile)
             }
         }
-    }
-
-    private fun copyAvatar(source: Uri): File? = try {
-        val dir = File(filesDir, "avatars").apply { mkdirs() }
-        val file = File(dir, "avatar_${System.currentTimeMillis()}.jpg")
-        contentResolver.openInputStream(source)?.use { input ->
-            file.outputStream().use { out -> input.copyTo(out) }
-        }
-        file
-    } catch (e: Exception) {
-        null
     }
 }
