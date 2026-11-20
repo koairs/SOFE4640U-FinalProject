@@ -1,9 +1,11 @@
 package com.example.sofe4640ufinalproject
 
-import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
+import android.util.Log
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.firestore
 
 object ListingStore {
 
@@ -21,75 +23,78 @@ object ListingStore {
         mediaType: String?,
         onDone: (Boolean) -> Unit
     ) {
-        try {
-            val values = ContentValues().apply {
-                put("title", title)
-                put("price", if (price.startsWith("$")) price else "\$$price")
-                put("category", category)
-                put("distance", "Nearby")
-                put("owner_id", currentUserId())
-                put("created_at", System.currentTimeMillis())
-                put("media_uri", mediaUri)
-                put("media_type", mediaType)
+        val data = mapOf(
+            "title" to title,
+            "price" to if (price.startsWith("$")) price else "\$$price",
+            "category" to category,
+            "distance" to "Nearby",
+            "ownerId" to currentUserId(),
+            "createdAt" to System.currentTimeMillis(),
+            "mediaUri" to (mediaUri ?: ""),
+            "mediaType" to (mediaType ?: "")
+        )
+        Firebase.firestore.collection("listings")
+            .add(data)
+            .addOnSuccessListener { doc ->
+                Log.d("ListingStore", "Saved to cloud: ${doc.id}")
+                onDone(true)
             }
-            val db = DatabaseHelper.getInstance(context).writableDatabase
-            val rowId = db.insert(DatabaseHelper.TABLE_LISTINGS, null, values)
-            onDone(rowId != -1L)
-        } catch (e: Exception) {
-            onDone(false)
-        }
+            .addOnFailureListener { e ->
+                Log.e("ListingStore", "Cloud save failed", e)
+                onDone(false)
+            }
     }
 
     fun loadAll(context: Context, onResult: (List<Listing>) -> Unit) {
-        try {
-            val db = DatabaseHelper.getInstance(context).readableDatabase
-            val cursor = db.query(
-                DatabaseHelper.TABLE_LISTINGS,
-                null, null, null, null, null,
-                "created_at DESC"
-            )
-            onResult(readListings(cursor))
-        } catch (e: Exception) {
-            onResult(emptyList())
-        }
+        Firebase.firestore.collection("listings")
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { result ->
+                val list = result.documents.mapNotNull { doc ->
+                    Listing(
+                        id = doc.id.hashCode().toLong(),
+                        title = doc.getString("title") ?: "",
+                        price = doc.getString("price") ?: "",
+                        category = doc.getString("category") ?: "",
+                        distance = doc.getString("distance") ?: "",
+                        ownerId = doc.getString("ownerId") ?: "",
+                        createdAt = doc.getLong("createdAt") ?: 0L,
+                        mediaUri = doc.getString("mediaUri")?.ifBlank { null },
+                        mediaType = doc.getString("mediaType")?.ifBlank { null }
+                    )
+                }
+                onResult(list)
+            }
+            .addOnFailureListener { e ->
+                Log.e("ListingStore", "Load all failed", e)
+                onResult(emptyList())
+            }
     }
 
     fun loadMine(context: Context, onResult: (List<Listing>) -> Unit) {
-        try {
-            val db = DatabaseHelper.getInstance(context).readableDatabase
-            val cursor = db.query(
-                DatabaseHelper.TABLE_LISTINGS,
-                null,
-                "owner_id = ?",
-                arrayOf(currentUserId()),
-                null, null,
-                "created_at DESC"
-            )
-            onResult(readListings(cursor))
-        } catch (e: Exception) {
-            onResult(emptyList())
-        }
-    }
-
-    private fun readListings(cursor: Cursor): List<Listing> {
-        val list = mutableListOf<Listing>()
-        cursor.use {
-            while (it.moveToNext()) {
-                list.add(
+        Firebase.firestore.collection("listings")
+            .whereEqualTo("ownerId", currentUserId())
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { result ->
+                val list = result.documents.mapNotNull { doc ->
                     Listing(
-                        id = it.getLong(it.getColumnIndexOrThrow("id")),
-                        title = it.getString(it.getColumnIndexOrThrow("title")),
-                        price = it.getString(it.getColumnIndexOrThrow("price")),
-                        category = it.getString(it.getColumnIndexOrThrow("category")),
-                        distance = it.getString(it.getColumnIndexOrThrow("distance")),
-                        ownerId = it.getString(it.getColumnIndexOrThrow("owner_id")),
-                        createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
-                        mediaUri = it.getString(it.getColumnIndexOrThrow("media_uri")),
-                        mediaType = it.getString(it.getColumnIndexOrThrow("media_type"))
+                        id = doc.id.hashCode().toLong(),
+                        title = doc.getString("title") ?: "",
+                        price = doc.getString("price") ?: "",
+                        category = doc.getString("category") ?: "",
+                        distance = doc.getString("distance") ?: "",
+                        ownerId = doc.getString("ownerId") ?: "",
+                        createdAt = doc.getLong("createdAt") ?: 0L,
+                        mediaUri = doc.getString("mediaUri")?.ifBlank { null },
+                        mediaType = doc.getString("mediaType")?.ifBlank { null }
                     )
-                )
+                }
+                onResult(list)
             }
-        }
-        return list
+            .addOnFailureListener { e ->
+                Log.e("ListingStore", "Load mine failed", e)
+                onResult(emptyList())
+            }
     }
 }

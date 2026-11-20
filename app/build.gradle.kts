@@ -37,11 +37,13 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.firebase.database)
     implementation(libs.material)
 
     implementation(platform("com.google.firebase:firebase-bom:35.1.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-firestore")
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
     testImplementation(libs.junit)

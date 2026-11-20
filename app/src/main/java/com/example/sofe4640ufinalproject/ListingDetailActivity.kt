@@ -89,10 +89,12 @@ class ListingDetailActivity : AppCompatActivity() {
         val btnRate = findViewById<Button>(R.id.btnRateSeller)
         if (ownerId == me) btnRate.visibility = View.GONE
         btnRate.setOnClickListener {
-            if (!RatingStore.hasInteracted(this, me, ownerId)) {
-                Toast.makeText(this, "Message the seller first, then you can rate them", Toast.LENGTH_LONG).show()
-            } else {
-                showRateDialog()
+            RatingStore.hasInteracted(this, me, ownerId) { interacted ->
+                if (!interacted) {
+                    Toast.makeText(this, "Message the seller first, then you can rate them", Toast.LENGTH_LONG).show()
+                } else {
+                    showRateDialog()
+                }
             }
         }
     }
@@ -103,54 +105,59 @@ class ListingDetailActivity : AppCompatActivity() {
     }
 
     private fun refreshSeller() {
-        findViewById<TextView>(R.id.tvSellerRating).text =
-            RatingStore.label(RatingStore.summary(this, ownerId))
+        RatingStore.summary(this, ownerId) { summary ->
+            findViewById<TextView>(R.id.tvSellerRating).text = RatingStore.label(summary)
+        }
 
         val iv = findViewById<ImageView>(R.id.ivSellerAvatar)
-        val path = ProfileStore.getPhoto(this, ownerId)
-        if (path != null && File(path).exists()) {
-            Glide.with(this).load(File(path)).centerCrop().into(iv)
-        } else {
-            iv.setImageResource(R.drawable.profile)
+        ProfileStore.getPhoto(this, ownerId) { path ->
+            if (path != null && File(path).exists()) {
+                Glide.with(this).load(File(path)).centerCrop().into(iv)
+            } else {
+                iv.setImageResource(R.drawable.profile)
+            }
         }
     }
 
     private fun showRateDialog() {
-        val bar = RatingBar(this).apply {
-            numStars = 5
-            stepSize = 1f
-            rating = (RatingStore.myRating(this@ListingDetailActivity, me, ownerId) ?: 5).toFloat()
-        }
-        val comment = EditText(this).apply { hint = "Comment (optional)" }
-        val box = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 24, 48, 0)
-            addView(
-                bar,
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { gravity = Gravity.CENTER_HORIZONTAL }
-            )
-            addView(comment)
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("Rate ${ownerId.substringBefore("@")}")
-            .setView(box)
-            .setPositiveButton("Submit") { _, _ ->
-                val stars = bar.rating.toInt().coerceIn(1, 5)
-                val ok = RatingStore.submit(
-                    this, me, ownerId, stars, comment.text.toString().trim()
-                )
-                Toast.makeText(
-                    this,
-                    if (ok) "Thanks for rating!" else "Couldn't save rating",
-                    Toast.LENGTH_SHORT
-                ).show()
-                refreshSeller()
+        RatingStore.myRating(this, me, ownerId) { existingStars ->
+            val bar = RatingBar(this).apply {
+                numStars = 5
+                stepSize = 1f
+                rating = (existingStars ?: 5).toFloat()
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+            val comment = EditText(this).apply { hint = "Comment (optional)" }
+            val box = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(48, 24, 48, 0)
+                addView(
+                    bar,
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { gravity = Gravity.CENTER_HORIZONTAL }
+                )
+                addView(comment)
+            }
+
+            AlertDialog.Builder(this)
+                .setTitle("Rate ${ownerId.substringBefore("@")}")
+                .setView(box)
+                .setPositiveButton("Submit") { _, _ ->
+                    val stars = bar.rating.toInt().coerceIn(1, 5)
+                    RatingStore.submit(
+                        this, me, ownerId, stars, comment.text.toString().trim()
+                    ) { ok ->
+                        Toast.makeText(
+                            this,
+                            if (ok) "Thanks for rating!" else "Couldn't save rating",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        refreshSeller()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
     }
 }

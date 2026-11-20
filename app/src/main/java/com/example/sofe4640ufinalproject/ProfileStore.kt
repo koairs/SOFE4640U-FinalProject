@@ -1,29 +1,37 @@
 package com.example.sofe4640ufinalproject
 
-import android.content.ContentValues
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
+import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 
 object ProfileStore {
 
-    fun getPhoto(context: Context, userId: String): String? {
-        val db = DatabaseHelper.getInstance(context).readableDatabase
-        db.rawQuery(
-            "SELECT photo_path FROM ${DatabaseHelper.TABLE_PROFILES} WHERE user_id = ?",
-            arrayOf(userId)
-        ).use { c ->
-            if (c.moveToFirst()) return c.getString(0)
-        }
-        return null
+    fun getPhoto(context: Context, userId: String, onResult: (String?) -> Unit) {
+        Firebase.firestore.collection("profiles").document(userId)
+            .get()
+            .addOnSuccessListener { doc ->
+                onResult(doc.getString("photoPath"))
+            }
+            .addOnFailureListener {
+                onResult(null)
+            }
     }
 
-    fun setPhoto(context: Context, userId: String, path: String) {
-        val values = ContentValues().apply {
-            put("user_id", userId)
-            put("photo_path", path)
-        }
-        DatabaseHelper.getInstance(context).writableDatabase.insertWithOnConflict(
-            DatabaseHelper.TABLE_PROFILES, null, values, SQLiteDatabase.CONFLICT_REPLACE
+    fun setPhoto(context: Context, userId: String, path: String, onDone: ((Boolean) -> Unit)? = null) {
+        val data = mapOf(
+            "userId" to userId,
+            "photoPath" to path
         )
+        Firebase.firestore.collection("profiles").document(userId)
+            .set(data)
+            .addOnSuccessListener {
+                Log.d("ProfileStore", "Photo saved to cloud")
+                onDone?.invoke(true)
+            }
+            .addOnFailureListener { e ->
+                Log.e("ProfileStore", "Photo save failed", e)
+                onDone?.invoke(false)
+            }
     }
 }

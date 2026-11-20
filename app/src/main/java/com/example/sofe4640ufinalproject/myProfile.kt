@@ -27,9 +27,14 @@ class myProfile : AppCompatActivity() {
         if (uri == null) return@registerForActivityResult
         val file = copyAvatar(uri)
         if (file != null) {
-            ProfileStore.setPhoto(this, ListingStore.currentUserId(), file.absolutePath)
-            loadAvatar()
-            Toast.makeText(this, "Profile photo updated", Toast.LENGTH_SHORT).show()
+            ProfileStore.setPhoto(this, ListingStore.currentUserId(), file.absolutePath) { success ->
+                if (success) {
+                    loadAvatar()
+                    Toast.makeText(this, "Profile photo updated", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Couldn't save photo to cloud", Toast.LENGTH_SHORT).show()
+                }
+            }
         } else {
             Toast.makeText(this, "Couldn't use that photo", Toast.LENGTH_SHORT).show()
         }
@@ -94,17 +99,19 @@ class myProfile : AppCompatActivity() {
         ListingStore.loadMine(this) { list ->
             findViewById<TextView>(R.id.tvListingsCount)?.text = list.size.toString()
         }
-        val s = RatingStore.summary(this, ListingStore.currentUserId())
-        findViewById<TextView>(R.id.tvMyRating)?.text =
-            if (s.count == 0) "New" else String.format("%.1f ★", s.average)
+        RatingStore.summary(this, ListingStore.currentUserId()) { s ->
+            findViewById<TextView>(R.id.tvMyRating)?.text =
+                if (s.count == 0) "New" else String.format("%.1f ★", s.average)
+        }
     }
 
     private fun loadAvatar() {
-        val path = ProfileStore.getPhoto(this, ListingStore.currentUserId())
-        if (path != null && File(path).exists()) {
-            Glide.with(this).load(File(path)).centerCrop().into(ivAvatar)
-        } else {
-            ivAvatar.setImageResource(R.drawable.profile)
+        ProfileStore.getPhoto(this, ListingStore.currentUserId()) { path ->
+            if (path != null && File(path).exists()) {
+                Glide.with(this).load(File(path)).centerCrop().into(ivAvatar)
+            } else {
+                ivAvatar.setImageResource(R.drawable.profile)
+            }
         }
     }
 
