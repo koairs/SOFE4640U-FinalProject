@@ -1,16 +1,40 @@
 package com.example.sofe4640ufinalproject
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import java.io.File
 
 class myProfile : AppCompatActivity() {
+
+    private lateinit var ivAvatar: ImageView
+
+    private val pickPhoto = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+        val file = copyAvatar(uri)
+        if (file != null) {
+            ProfileStore.setPhoto(this, ListingStore.currentUserId(), file.absolutePath)
+            loadAvatar()
+            Toast.makeText(this, "Profile photo updated", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Couldn't use that photo", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -19,6 +43,7 @@ class myProfile : AppCompatActivity() {
         val user = FirebaseAuth.getInstance().currentUser
         val tvName = findViewById<TextView>(R.id.textView)
         val tvEmail = findViewById<TextView>(R.id.tvUserEmail)
+        ivAvatar = findViewById(R.id.imageView)
 
         if (user != null) {
             val displayName = user.displayName?.ifBlank { null } ?: user.email?.substringBefore("@") ?: "User"
@@ -27,6 +52,12 @@ class myProfile : AppCompatActivity() {
         } else {
             tvName?.text = "Guest User"
             tvEmail?.text = "Not logged in"
+        }
+
+        ivAvatar.setOnClickListener {
+            pickPhoto.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
         }
 
         val btnLogout = findViewById<Button>(R.id.btnLogout)
@@ -59,8 +90,32 @@ class myProfile : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        loadAvatar()
         ListingStore.loadMine(this) { list ->
             findViewById<TextView>(R.id.tvListingsCount)?.text = list.size.toString()
         }
+        val s = RatingStore.summary(this, ListingStore.currentUserId())
+        findViewById<TextView>(R.id.tvMyRating)?.text =
+            if (s.count == 0) "New" else String.format("%.1f ★", s.average)
+    }
+
+    private fun loadAvatar() {
+        val path = ProfileStore.getPhoto(this, ListingStore.currentUserId())
+        if (path != null && File(path).exists()) {
+            Glide.with(this).load(File(path)).centerCrop().into(ivAvatar)
+        } else {
+            ivAvatar.setImageResource(R.drawable.profile)
+        }
+    }
+
+    private fun copyAvatar(source: Uri): File? = try {
+        val dir = File(filesDir, "avatars").apply { mkdirs() }
+        val file = File(dir, "avatar_${System.currentTimeMillis()}.jpg")
+        contentResolver.openInputStream(source)?.use { input ->
+            file.outputStream().use { out -> input.copyTo(out) }
+        }
+        file
+    } catch (e: Exception) {
+        null
     }
 }

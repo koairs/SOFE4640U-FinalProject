@@ -31,7 +31,8 @@ class ListingAdapter(private var items: List<Listing>) :
         val item = items[position]
         holder.title.text = item.title
         holder.price.text = item.price
-        holder.meta.text = "${item.category} • ${item.distance}"
+        val rating = RatingStore.label(RatingStore.summary(holder.itemView.context, item.ownerId))
+        holder.meta.text = "${item.category} • ${item.distance} • $rating"
 
         if (item.mediaUri != null) {
             Glide.with(holder.thumb).load(Uri.parse(item.mediaUri))

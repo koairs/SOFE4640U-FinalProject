@@ -181,6 +181,7 @@
                             app:strokeWidth="1.5dp">
 
                             <ImageView
+                                android:id="@+id/ivSellerAvatar"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:contentDescription="Seller Avatar"
@@ -196,21 +197,31 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/tvSellerName"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Verified Seller"
+                                android:text="Seller"
                                 android:textColor="@color/text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/tvSellerRating"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Active on Marketplace"
+                                android:text="No ratings yet"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                         </LinearLayout>
 
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnRateSeller"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Rate"
+                            android:textColor="@color/accent_dark"
+                            app:strokeColor="@color/accent" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 

@@ -76,6 +76,14 @@
                     </com.google.android.material.card.MaterialCardView>
 
                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Tap photo to change"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+
+                    <TextView
                         android:id="@+id/textView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -174,9 +182,10 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvMyRating"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="4.9 ★"
+                            android:text="--"
                             android:textColor="@color/accent_dark"
                             android:textSize="20sp"
                             android:textStyle="bold" />
