@@ -1,10 +1,14 @@
 package com.example.sofe4640ufinalproject
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -15,6 +19,7 @@ class ConversationAdapter(
 ) : RecyclerView.Adapter<ConversationAdapter.VH>() {
 
     class VH(v: View) : RecyclerView.ViewHolder(v) {
+        val ivAvatar: ImageView = v.findViewById(R.id.ivAvatar)
         val tvOtherUser: TextView = v.findViewById(R.id.tvOtherUser)
         val tvLastMessage: TextView = v.findViewById(R.id.tvLastMessage)
         val tvTime: TextView = v.findViewById(R.id.tvTime)
@@ -39,6 +44,22 @@ class ConversationAdapter(
             holder.tvItemTag.text = "Re: ${item.itemTitle}"
         } else {
             holder.tvItemTag.visibility = View.GONE
+        }
+
+        ProfileStore.getPhoto(holder.itemView.context, item.otherUser) { path ->
+            if (path != null && File(path).exists()) {
+                Glide.with(holder.itemView.context).load(File(path)).centerCrop().into(holder.ivAvatar)
+            } else {
+                holder.ivAvatar.setImageResource(R.drawable.profile)
+            }
+        }
+
+        holder.ivAvatar.setOnClickListener {
+            val ctx = it.context
+            val intent = Intent(ctx, Profile::class.java).apply {
+                putExtra("userId", item.otherUser)
+            }
+            ctx.startActivity(intent)
         }
 
         holder.itemView.setOnClickListener { onClick(item) }

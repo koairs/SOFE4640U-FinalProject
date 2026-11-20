@@ -1,5 +1,6 @@
 package com.example.sofe4640ufinalproject
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
@@ -35,7 +36,16 @@ class ChatActivity : AppCompatActivity() {
         otherUser = intent.getStringExtra("otherUser") ?: "Seller"
         itemTitle = intent.getStringExtra("itemTitle") ?: ""
 
-        findViewById<TextView>(R.id.tvChatPartner).text = otherUser
+        val tvPartner = findViewById<TextView>(R.id.tvChatPartner)
+        tvPartner.text = otherUser
+        val openProfile = View.OnClickListener {
+            val intent = Intent(this, Profile::class.java).apply {
+                putExtra("userId", otherUser)
+            }
+            startActivity(intent)
+        }
+        tvPartner.setOnClickListener(openProfile)
+
         val tvTag = findViewById<TextView>(R.id.tvItemTitleTag)
         if (itemTitle.isNotBlank()) {
             tvTag.visibility = View.VISIBLE

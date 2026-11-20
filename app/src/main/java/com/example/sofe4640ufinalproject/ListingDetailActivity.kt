@@ -115,7 +115,17 @@ class ListingDetailActivity : AppCompatActivity() {
             showDeleteDialog()
         }
 
-        findViewById<TextView>(R.id.tvSellerName).text = ownerId.substringBefore("@")
+        val tvSellerName = findViewById<TextView>(R.id.tvSellerName)
+        tvSellerName.text = ownerId.substringBefore("@")
+
+        val openSellerProfile = View.OnClickListener {
+            val intent = Intent(this, Profile::class.java).apply {
+                putExtra("userId", ownerId)
+            }
+            startActivity(intent)
+        }
+        findViewById<View>(R.id.ivSellerAvatar)?.setOnClickListener(openSellerProfile)
+        tvSellerName.setOnClickListener(openSellerProfile)
 
         btnRate.setOnClickListener {
             RatingStore.hasInteracted(this, me, ownerId) { interacted ->

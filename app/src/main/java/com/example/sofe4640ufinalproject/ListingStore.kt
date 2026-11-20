@@ -115,9 +115,12 @@ object ListingStore {
     }
 
     fun loadMine(context: Context, onResult: (List<Listing>) -> Unit) {
-        val current = currentUserId()
+        loadUserListings(context, currentUserId(), onResult)
+    }
+
+    fun loadUserListings(context: Context, userId: String, onResult: (List<Listing>) -> Unit) {
         Firebase.firestore.collection("listings")
-            .whereEqualTo("ownerId", current)
+            .whereEqualTo("ownerId", userId)
             .get()
             .addOnSuccessListener { result ->
                 val list = result.documents.mapNotNull { doc ->
@@ -137,7 +140,7 @@ object ListingStore {
                 onResult(list)
             }
             .addOnFailureListener { e ->
-                Log.e("ListingStore", "Load mine failed", e)
+                Log.e("ListingStore", "Load user listings failed", e)
                 onResult(emptyList())
             }
     }
