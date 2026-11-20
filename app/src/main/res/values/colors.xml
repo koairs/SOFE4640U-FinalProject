@@ -14,4 +14,16 @@
     <color name="nav_inactive">#9FB3C8</color>
     <color name="accent_light">#5EEAD4</color>
 
+    <!-- Color Blind Safe Palette (High Contrast Okabe-Ito / W3C Accessible) -->
+    <color name="cb_primary">#0B192C</color>
+    <color name="cb_accent">#D97706</color>
+    <color name="cb_accent_dark">#B45309</color>
+    <color name="cb_accent_light">#FBBF24</color>
+    <color name="cb_bg_main">#F8FAFC</color>
+    <color name="cb_surface">#FFFFFF</color>
+    <color name="cb_text_primary">#020617</color>
+    <color name="cb_text_secondary">#334155</color>
+    <color name="cb_divider">#CBD5E1</color>
+    <color name="cb_nav_inactive">#64748B</color>
+
 </resources>

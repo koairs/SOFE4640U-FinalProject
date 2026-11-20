@@ -72,4 +72,9 @@ class SignUpActivity : AppCompatActivity() {
             finish() // goes back to the login screen
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        ColorBlindHelper.apply(this)
+    }
 }

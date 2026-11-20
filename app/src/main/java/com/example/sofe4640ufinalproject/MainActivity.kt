@@ -68,6 +68,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        ColorBlindHelper.apply(this)
+    }
+
     private fun goToHome() {
         startActivity(Intent(this, Homepage::class.java))
         finish()

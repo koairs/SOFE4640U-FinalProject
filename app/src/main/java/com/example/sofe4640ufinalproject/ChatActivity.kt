@@ -76,6 +76,11 @@ class ChatActivity : AppCompatActivity() {
         loadMessages()
     }
 
+    override fun onResume() {
+        super.onResume()
+        ColorBlindHelper.apply(this)
+    }
+
     private fun loadMessages() {
         MessageStore.getMessagesBetween(this, otherUser) { list ->
             adapter.update(list)

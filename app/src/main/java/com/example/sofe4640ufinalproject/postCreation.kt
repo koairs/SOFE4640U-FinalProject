@@ -134,6 +134,11 @@ class postCreation : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        ColorBlindHelper.apply(this)
+    }
+
     private fun newMediaFile(ext: String): File {
         val dir = File(getExternalFilesDir(null), "media").apply { mkdirs() }
         return File(dir, "MEDIA_${System.currentTimeMillis()}.$ext")

@@ -48,6 +48,7 @@ class myListings : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        ColorBlindHelper.apply(this)
         ListingStore.loadMine(this) { adapter.update(it) }
     }
 }

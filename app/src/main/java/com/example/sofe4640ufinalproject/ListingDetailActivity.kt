@@ -130,6 +130,7 @@ class ListingDetailActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        ColorBlindHelper.apply(this)
         refreshSeller()
     }
 

@@ -63,6 +63,7 @@ class Messages : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        ColorBlindHelper.apply(this)
         MessageStore.getRecentConversations(this) { list ->
             allConversations = list
             applyFilter()

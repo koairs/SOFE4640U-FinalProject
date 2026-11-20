@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 
@@ -59,6 +60,13 @@ class myProfile : AppCompatActivity() {
             )
         }
 
+        val switchColorBlind = findViewById<SwitchMaterial>(R.id.switchColorBlind)
+        switchColorBlind?.isChecked = ColorBlindHelper.isColorBlindMode(this)
+        switchColorBlind?.setOnCheckedChangeListener { _, isChecked ->
+            ColorBlindHelper.setColorBlindMode(this, isChecked)
+            recreate()
+        }
+
         val btnLogout = findViewById<Button>(R.id.btnLogout)
         btnLogout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
@@ -85,10 +93,13 @@ class myProfile : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        ColorBlindHelper.apply(this)
     }
 
     override fun onResume() {
         super.onResume()
+        ColorBlindHelper.apply(this)
         loadAvatar()
         ListingStore.loadMine(this) { list ->
             findViewById<TextView>(R.id.tvListingsCount)?.text = list.size.toString()

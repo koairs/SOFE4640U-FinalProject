@@ -29,7 +29,6 @@ class Homepage : AppCompatActivity() {
         rv.layoutManager = LinearLayoutManager(this)
         rv.adapter = adapter
 
-
         etSearch = findViewById(R.id.etSearch)
         etSearch.doOnTextChanged { _, _, _, _ -> applyFilter() }
 
@@ -58,6 +57,7 @@ class Homepage : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        ColorBlindHelper.apply(this)
         ListingStore.loadAll(this) {
             allListings = it
             applyFilter()

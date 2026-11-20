@@ -31,7 +31,10 @@ class ListingAdapter(private var items: List<Listing>) :
         val item = items[position]
         holder.title.text = item.title
         holder.price.text = item.price
-        
+
+        val isCB = ColorBlindHelper.isColorBlindMode(holder.itemView.context)
+        ColorBlindHelper.recolorViewTree(holder.itemView, isCB)
+
         RatingStore.summary(holder.itemView.context, item.ownerId) { summary ->
             val rating = RatingStore.label(summary)
             holder.meta.text = "${item.category} • ${item.distance} • $rating"
