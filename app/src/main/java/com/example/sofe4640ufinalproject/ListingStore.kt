@@ -81,20 +81,11 @@ object ListingStore {
         onDone: (Boolean) -> Unit
     ) {
         var mediaBase64 = ""
-        if (!mediaUri.isNullOrBlank()) {
+        val storedMediaUri = if (mediaType == "video") (mediaUri ?: "") else ""
+        if (!mediaUri.isNullOrBlank() && mediaType != "video") {
             try {
                 val uri = Uri.parse(mediaUri)
-                if (mediaType == "video") {
-                    val inputStream = when (uri.scheme) {
-                        "file" -> FileInputStream(uri.path ?: "")
-                        else -> context.contentResolver.openInputStream(uri) ?: FileInputStream(uri.path ?: "")
-                    }
-                    val bytes = inputStream.readBytes()
-                    inputStream.close()
-                    mediaBase64 = Base64.encodeToString(bytes, Base64.DEFAULT)
-                } else {
-                    mediaBase64 = compressImageToBase64(context, uri)
-                }
+                mediaBase64 = compressImageToBase64(context, uri)
             } catch (e: Exception) {
                 Log.e("ListingStore", "Failed to encode media", e)
             }
@@ -109,7 +100,7 @@ object ListingStore {
             "distance" to "Nearby",
             "ownerId" to currentUserId(),
             "createdAt" to System.currentTimeMillis(),
-            "mediaUri" to "",
+            "mediaUri" to storedMediaUri,
             "mediaType" to (mediaType ?: ""),
             "isSold" to false,
             "mediaBase64" to mediaBase64
@@ -117,7 +108,7 @@ object ListingStore {
         Firebase.firestore.collection("listings")
             .add(data)
             .addOnSuccessListener { doc ->
-                Log.d("ListingStore", "Saved to cloud with photo: ${doc.id}")
+                Log.d("ListingStore", "Saved to cloud with media: ${doc.id}")
                 onDone(true)
             }
             .addOnFailureListener { e ->
@@ -195,6 +186,7 @@ object ListingStore {
         val list = documents.map { doc ->
             val docId = doc.id
             val base64Str = doc.getString("mediaBase64")
+            val storedUri = doc.getString("mediaUri") ?: ""
             val type = doc.getString("mediaType") ?: "photo"
             var resolvedMediaUri = ""
 
@@ -203,13 +195,15 @@ object ListingStore {
                     val decodedBytes = Base64.decode(base64Str, Base64.DEFAULT)
                     val ext = if (type == "video") "mp4" else "jpg"
                     val cacheFile = File(context.cacheDir, "listing_$docId.$ext")
-                    if (!cacheFile.exists()) {
+                    if (!cacheFile.exists() || cacheFile.length() == 0L) {
                         cacheFile.writeBytes(decodedBytes)
                     }
                     resolvedMediaUri = cacheFile.absolutePath
                 } catch (e: Exception) {
                     Log.e("ListingStore", "Failed to decode listing media Base64", e)
                 }
+            } else if (storedUri.isNotBlank()) {
+                resolvedMediaUri = storedUri
             }
 
             Listing(
