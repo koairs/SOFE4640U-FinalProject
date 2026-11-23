@@ -58,15 +58,17 @@ object MessageStore {
         Firebase.firestore.collection("messages")
             .whereEqualTo("senderId", otherUser)
             .whereEqualTo("receiverId", current)
-            .whereEqualTo("isRead", false)
             .get()
             .addOnSuccessListener { result ->
-                if (result.isEmpty) {
+                val unreadDocs = result.documents.filter { doc ->
+                    doc.getBoolean("isRead") != true
+                }
+                if (unreadDocs.isEmpty()) {
                     onDone?.invoke(true)
                     return@addOnSuccessListener
                 }
                 val batch = Firebase.firestore.batch()
-                for (doc in result.documents) {
+                for (doc in unreadDocs) {
                     batch.update(doc.reference, "isRead", true)
                 }
                 batch.commit()

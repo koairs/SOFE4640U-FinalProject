@@ -29,6 +29,7 @@ class Messages : AppCompatActivity() {
         val rv = findViewById<RecyclerView>(R.id.rvMessages)
         rv.layoutManager = LinearLayoutManager(this)
         adapter = ConversationAdapter(emptyList()) { conv ->
+            MessageStore.markMessagesAsRead(this, conv.otherUser)
             val intent = Intent(this, ChatActivity::class.java).apply {
                 putExtra("otherUser", conv.otherUser)
                 putExtra("itemTitle", conv.itemTitle)
@@ -88,7 +89,6 @@ class Messages : AppCompatActivity() {
                 val matchesChip = when (checkedChipId) {
                     R.id.chipBuying -> !conv.isSelling
                     R.id.chipSelling -> conv.isSelling
-                    R.id.chipUnread -> conv.isUnread
                     else -> true
                 }
 
