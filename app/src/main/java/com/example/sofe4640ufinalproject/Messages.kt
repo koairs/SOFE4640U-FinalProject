@@ -12,11 +12,13 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.ChipGroup
 
 class Messages : AppCompatActivity() {
 
     private lateinit var adapter: ConversationAdapter
     private lateinit var etSearch: EditText
+    private lateinit var cgMessageFilters: ChipGroup
     private var allConversations: List<Conversation> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +39,9 @@ class Messages : AppCompatActivity() {
 
         etSearch = findViewById(R.id.etSearchMessages)
         etSearch.doOnTextChanged { _, _, _, _ -> applyFilter() }
+
+        cgMessageFilters = findViewById(R.id.cgMessageFilters)
+        cgMessageFilters.setOnCheckedStateChangeListener { _, _ -> applyFilter() }
 
         findViewById<ImageButton>(R.id.profileButton).setOnClickListener {
             startActivity(Intent(this, myProfile::class.java))
@@ -72,11 +77,22 @@ class Messages : AppCompatActivity() {
 
     private fun applyFilter() {
         val q = etSearch.text.toString().trim()
+        val checkedChipId = cgMessageFilters.checkedChipId
+
         adapter.update(
-            allConversations.filter {
-                it.otherUser.contains(q, ignoreCase = true) ||
-                        it.lastMessage.contains(q, ignoreCase = true) ||
-                        it.itemTitle.contains(q, ignoreCase = true)
+            allConversations.filter { conv ->
+                val matchesSearch = conv.otherUser.contains(q, ignoreCase = true) ||
+                        conv.lastMessage.contains(q, ignoreCase = true) ||
+                        conv.itemTitle.contains(q, ignoreCase = true)
+
+                val matchesChip = when (checkedChipId) {
+                    R.id.chipBuying -> !conv.isSelling
+                    R.id.chipSelling -> conv.isSelling
+                    R.id.chipUnread -> conv.isUnread
+                    else -> true
+                }
+
+                matchesSearch && matchesChip
             }
         )
     }

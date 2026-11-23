@@ -127,6 +127,31 @@
                             </com.google.android.material.card.MaterialCardView>
                         </LinearLayout>
 
+                        <!-- Sold Status Banner -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardSoldStatus"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:visibility="gone"
+                            app:cardBackgroundColor="#FEE2E2"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="#EF4444"
+                            app:strokeWidth="1dp"
+                            tools:visibility="visible">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:padding="8dp"
+                                android:text="THIS ITEM HAS BEEN MARKED AS SOLD"
+                                android:textColor="#DC2626"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </com.google.android.material.card.MaterialCardView>
+
                         <View
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
@@ -229,7 +254,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Action Bar (Owner: Edit / Delete) -->
+    <!-- Bottom Action Bar (Owner: Edit / Mark Sold / Delete) -->
     <LinearLayout
         android:id="@+id/layoutOwnerActions"
         android:layout_width="match_parent"
@@ -245,12 +270,25 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="4dp"
             android:text="Edit"
             android:textColor="@color/surface"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
             app:backgroundTint="@color/primary"
+            app:cornerRadius="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnToggleSold"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1.2"
+            android:layout_marginHorizontal="4dp"
+            android:text="Mark Sold"
+            android:textColor="@color/surface"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="#059669"
             app:cornerRadius="16dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -258,10 +296,10 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:text="Delete"
             android:textColor="@color/surface"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
             app:backgroundTint="#DC2626"
             app:cornerRadius="16dp" />

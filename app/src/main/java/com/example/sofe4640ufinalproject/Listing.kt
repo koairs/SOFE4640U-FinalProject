@@ -10,5 +10,6 @@ data class Listing(
     val ownerId: String = "",
     val createdAt: Long = 0L,
     val mediaUri: String? = null,
-    val mediaType: String? = null
+    val mediaType: String? = null,
+    val isSold: Boolean = false
 )

@@ -1,6 +1,7 @@
 package com.example.sofe4640ufinalproject
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
@@ -19,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
+import com.google.android.material.button.MaterialButton
 import java.io.File
 
 class ListingDetailActivity : AppCompatActivity() {
@@ -30,6 +32,7 @@ class ListingDetailActivity : AppCompatActivity() {
     private lateinit var currentDesc: String
     private lateinit var currentPrice: String
     private lateinit var currentCategory: String
+    private var isSold: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +50,7 @@ class ListingDetailActivity : AppCompatActivity() {
         currentDesc = intent.getStringExtra("description") ?: ""
         currentPrice = intent.getStringExtra("price") ?: ""
         currentCategory = intent.getStringExtra("category") ?: ""
+        isSold = intent.getBooleanExtra("isSold", false)
         val mediaUriStr = intent.getStringExtra("mediaUri")
         val mediaType = intent.getStringExtra("mediaType")
         ownerId = intent.getStringExtra("ownerId") ?: "Seller"
@@ -99,16 +103,36 @@ class ListingDetailActivity : AppCompatActivity() {
             btnRate.visibility = View.VISIBLE
         }
 
+        updateSoldUI()
+
         findViewById<Button>(R.id.btnContactSeller)?.setOnClickListener {
             val chat = Intent(this, ChatActivity::class.java).apply {
                 putExtra("otherUser", ownerId)
                 putExtra("itemTitle", currentTitle)
+                putExtra("listingOwnerId", ownerId)
             }
             startActivity(chat)
         }
 
         findViewById<Button>(R.id.btnEditListing)?.setOnClickListener {
             showEditDialog()
+        }
+
+        findViewById<Button>(R.id.btnToggleSold)?.setOnClickListener {
+            val nextSoldState = !isSold
+            ListingStore.markAsSold(this, listingId, nextSoldState) { success ->
+                if (success) {
+                    isSold = nextSoldState
+                    updateSoldUI()
+                    Toast.makeText(
+                        this,
+                        if (isSold) "Listing marked as Sold" else "Listing marked as Available",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    Toast.makeText(this, "Failed to update item status", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         findViewById<Button>(R.id.btnDeleteListing)?.setOnClickListener {
@@ -135,6 +159,26 @@ class ListingDetailActivity : AppCompatActivity() {
                     showRateDialog()
                 }
             }
+        }
+    }
+
+    private fun updateSoldUI() {
+        val cardSold = findViewById<View>(R.id.cardSoldStatus)
+        val btnToggleSold = findViewById<MaterialButton>(R.id.btnToggleSold)
+        val btnContactSeller = findViewById<MaterialButton>(R.id.btnContactSeller)
+
+        if (isSold) {
+            cardSold?.visibility = View.VISIBLE
+            btnToggleSold?.text = "Mark Available"
+            btnToggleSold?.setBackgroundColor(Color.parseColor("#475569"))
+            btnContactSeller?.isEnabled = false
+            btnContactSeller?.text = "Item Sold"
+        } else {
+            cardSold?.visibility = View.GONE
+            btnToggleSold?.text = "Mark Sold"
+            btnToggleSold?.setBackgroundColor(Color.parseColor("#059669"))
+            btnContactSeller?.isEnabled = true
+            btnContactSeller?.text = "Message Seller"
         }
     }
 

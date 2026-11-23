@@ -19,6 +19,7 @@ class ListingAdapter(private var items: List<Listing>) :
         val meta: TextView = view.findViewById(R.id.tvMeta)
         val thumb: ImageView = view.findViewById(R.id.ivThumb)
         val play: TextView = view.findViewById(R.id.tvPlay)
+        val soldBadge: TextView = view.findViewById(R.id.tvSoldBadge)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -52,6 +53,14 @@ class ListingAdapter(private var items: List<Listing>) :
             holder.play.visibility = View.GONE
         }
 
+        if (item.isSold) {
+            holder.soldBadge.visibility = View.VISIBLE
+            holder.itemView.alpha = 0.75f
+        } else {
+            holder.soldBadge.visibility = View.GONE
+            holder.itemView.alpha = 1.0f
+        }
+
         holder.itemView.setOnClickListener {
             val ctx = it.context
             ctx.startActivity(
@@ -64,6 +73,7 @@ class ListingAdapter(private var items: List<Listing>) :
                     putExtra("mediaUri", item.mediaUri)
                     putExtra("mediaType", item.mediaType)
                     putExtra("ownerId", item.ownerId)
+                    putExtra("isSold", item.isSold)
                 }
             )
         }

@@ -53,6 +53,23 @@
                     android:textSize="14sp"
                     android:visibility="gone"
                     tools:visibility="visible" />
+
+                <!-- Sold Badge Overlay -->
+                <TextView
+                    android:id="@+id/tvSoldBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|start"
+                    android:layout_margin="4dp"
+                    android:background="#DC2626"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    android:text="SOLD"
+                    android:textColor="@color/surface"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
 

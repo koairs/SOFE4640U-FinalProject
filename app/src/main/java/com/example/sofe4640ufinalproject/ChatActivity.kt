@@ -25,6 +25,7 @@ class ChatActivity : AppCompatActivity() {
 
     private lateinit var otherUser: String
     private lateinit var itemTitle: String
+    private lateinit var listingOwnerId: String
     private lateinit var adapter: ChatAdapter
     private lateinit var rvMessages: RecyclerView
     private lateinit var etInput: EditText
@@ -56,6 +57,7 @@ class ChatActivity : AppCompatActivity() {
 
         otherUser = intent.getStringExtra("otherUser") ?: "Seller"
         itemTitle = intent.getStringExtra("itemTitle") ?: ""
+        listingOwnerId = intent.getStringExtra("listingOwnerId") ?: ""
 
         val tvPartner = findViewById<TextView>(R.id.tvChatPartner)
         tvPartner.text = otherUser
@@ -94,7 +96,7 @@ class ChatActivity : AppCompatActivity() {
         btnSend.setOnClickListener {
             val text = etInput.text.toString().trim()
             if (text.isNotBlank()) {
-                MessageStore.sendMessage(this, otherUser, itemTitle, text) { success ->
+                MessageStore.sendMessage(this, otherUser, itemTitle, text, listingOwnerId = listingOwnerId) { success ->
                     if (success) {
                         etInput.setText("")
                         loadMessages()
@@ -165,7 +167,8 @@ class ChatActivity : AppCompatActivity() {
                 itemTitle = itemTitle,
                 messageText = "🎤 Voice Message",
                 audioUri = path,
-                isAudio = true
+                isAudio = true,
+                listingOwnerId = listingOwnerId
             ) { success ->
                 if (success) {
                     Toast.makeText(this, "Voice message sent", Toast.LENGTH_SHORT).show()
@@ -185,6 +188,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun loadMessages() {
+        MessageStore.markMessagesAsRead(this, otherUser)
         MessageStore.getMessagesBetween(this, otherUser) { list ->
             adapter.update(list)
             if (list.isNotEmpty()) {

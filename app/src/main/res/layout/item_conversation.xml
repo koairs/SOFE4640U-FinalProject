@@ -47,6 +47,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <TextView
@@ -68,6 +69,19 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp"
                     tools:text="10:42 AM" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardUnreadDot"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="6dp"
+                    android:visibility="gone"
+                    app:cardBackgroundColor="#2563EB"
+                    app:cardCornerRadius="5dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp"
+                    tools:visibility="visible" />
             </LinearLayout>
 
             <TextView

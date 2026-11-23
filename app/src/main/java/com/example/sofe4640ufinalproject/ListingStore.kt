@@ -32,7 +32,8 @@ object ListingStore {
             "ownerId" to currentUserId(),
             "createdAt" to System.currentTimeMillis(),
             "mediaUri" to (mediaUri ?: ""),
-            "mediaType" to (mediaType ?: "")
+            "mediaType" to (mediaType ?: ""),
+            "isSold" to false
         )
         Firebase.firestore.collection("listings")
             .add(data)
@@ -72,6 +73,23 @@ object ListingStore {
             }
     }
 
+    fun markAsSold(
+        context: Context,
+        listingId: String,
+        isSold: Boolean,
+        onDone: (Boolean) -> Unit
+    ) {
+        Firebase.firestore.collection("listings").document(listingId)
+            .update("isSold", isSold)
+            .addOnSuccessListener {
+                onDone(true)
+            }
+            .addOnFailureListener { e ->
+                Log.e("ListingStore", "markAsSold failed", e)
+                onDone(false)
+            }
+    }
+
     fun delete(
         context: Context,
         listingId: String,
@@ -103,7 +121,8 @@ object ListingStore {
                         ownerId = doc.getString("ownerId") ?: "",
                         createdAt = doc.getLong("createdAt") ?: 0L,
                         mediaUri = doc.getString("mediaUri")?.ifBlank { null },
-                        mediaType = doc.getString("mediaType")?.ifBlank { null }
+                        mediaType = doc.getString("mediaType")?.ifBlank { null },
+                        isSold = doc.getBoolean("isSold") ?: false
                     )
                 }.sortedByDescending { it.createdAt }
                 onResult(list)
@@ -134,7 +153,8 @@ object ListingStore {
                         ownerId = doc.getString("ownerId") ?: "",
                         createdAt = doc.getLong("createdAt") ?: 0L,
                         mediaUri = doc.getString("mediaUri")?.ifBlank { null },
-                        mediaType = doc.getString("mediaType")?.ifBlank { null }
+                        mediaType = doc.getString("mediaType")?.ifBlank { null },
+                        isSold = doc.getBoolean("isSold") ?: false
                     )
                 }.sortedByDescending { it.createdAt }
                 onResult(list)

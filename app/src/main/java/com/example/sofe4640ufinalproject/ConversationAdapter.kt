@@ -1,11 +1,13 @@
 package com.example.sofe4640ufinalproject
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import java.io.File
@@ -24,6 +26,7 @@ class ConversationAdapter(
         val tvLastMessage: TextView = v.findViewById(R.id.tvLastMessage)
         val tvTime: TextView = v.findViewById(R.id.tvTime)
         val tvItemTag: TextView = v.findViewById(R.id.tvItemTag)
+        val cardUnreadDot: View = v.findViewById(R.id.cardUnreadDot)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -42,11 +45,29 @@ class ConversationAdapter(
         val isCB = ColorBlindHelper.isColorBlindMode(holder.itemView.context)
         ColorBlindHelper.recolorViewTree(holder.itemView, isCB)
 
+        val typePrefix = if (item.isSelling) "[Selling]" else "[Buying]"
         if (item.itemTitle.isNotBlank()) {
             holder.tvItemTag.visibility = View.VISIBLE
-            holder.tvItemTag.text = "Re: ${item.itemTitle}"
+            holder.tvItemTag.text = "$typePrefix Re: ${item.itemTitle}"
         } else {
-            holder.tvItemTag.visibility = View.GONE
+            holder.tvItemTag.visibility = View.VISIBLE
+            holder.tvItemTag.text = typePrefix
+        }
+
+        if (item.isUnread) {
+            holder.cardUnreadDot.visibility = View.VISIBLE
+            holder.tvOtherUser.setTypeface(null, Typeface.BOLD)
+            holder.tvLastMessage.setTypeface(null, Typeface.BOLD)
+            holder.tvLastMessage.setTextColor(
+                ContextCompat.getColor(holder.itemView.context, R.color.text_primary)
+            )
+        } else {
+            holder.cardUnreadDot.visibility = View.GONE
+            holder.tvOtherUser.setTypeface(null, Typeface.NORMAL)
+            holder.tvLastMessage.setTypeface(null, Typeface.NORMAL)
+            holder.tvLastMessage.setTextColor(
+                ContextCompat.getColor(holder.itemView.context, R.color.text_secondary)
+            )
         }
 
         ProfileStore.getPhoto(holder.itemView.context, item.otherUser) { path ->
