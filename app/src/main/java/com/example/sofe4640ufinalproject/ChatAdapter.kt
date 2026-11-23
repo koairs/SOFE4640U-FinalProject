@@ -38,6 +38,9 @@ class ChatAdapter(
         val msg = messages[position]
         val timeStr = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(msg.timestamp))
 
+        val isCB = ColorBlindHelper.isColorBlindMode(holder.itemView.context)
+        ColorBlindHelper.recolorViewTree(holder.itemView, isCB)
+
         if (holder is SentVH) {
             holder.text.text = msg.messageText
             holder.time.text = timeStr
