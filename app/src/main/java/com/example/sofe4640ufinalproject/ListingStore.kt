@@ -6,7 +6,6 @@ import android.util.Base64
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.database
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
 import java.io.File
@@ -55,26 +54,14 @@ object ListingStore {
             "createdAt" to System.currentTimeMillis(),
             "mediaUri" to "",
             "mediaType" to (mediaType ?: ""),
-            "isSold" to false
+            "isSold" to false,
+            "mediaBase64" to mediaBase64
         )
         Firebase.firestore.collection("listings")
             .add(data)
             .addOnSuccessListener { doc ->
-                val docId = doc.id
-                Log.d("ListingStore", "Saved to cloud: $docId")
-                if (mediaBase64.isNotBlank()) {
-                    Firebase.database.reference.child("listing_media").child(docId)
-                        .setValue(mediaBase64)
-                        .addOnSuccessListener {
-                            onDone(true)
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("ListingStore", "Media save to Realtime DB failed", e)
-                            onDone(true)
-                        }
-                } else {
-                    onDone(true)
-                }
+                Log.d("ListingStore", "Saved to cloud with photo: ${doc.id}")
+                onDone(true)
             }
             .addOnFailureListener { e ->
                 Log.e("ListingStore", "Cloud save failed", e)
@@ -135,7 +122,6 @@ object ListingStore {
         Firebase.firestore.collection("listings").document(listingId)
             .delete()
             .addOnSuccessListener {
-                Firebase.database.reference.child("listing_media").child(listingId).removeValue()
                 onDone(true)
             }
             .addOnFailureListener { e ->
@@ -149,66 +135,44 @@ object ListingStore {
         documents: List<DocumentSnapshot>,
         onResult: (List<Listing>) -> Unit
     ) {
-        Firebase.database.reference.child("listing_media").get()
-            .addOnSuccessListener { snapshot ->
-                val mediaMap = snapshot.children.associate { it.key to (it.value as? String) }
+        val list = documents.map { doc ->
+            val docId = doc.id
+            val base64Str = doc.getString("mediaBase64")
+            val type = doc.getString("mediaType") ?: "photo"
+            var resolvedMediaUri = ""
 
-                val list = documents.map { doc ->
-                    val docId = doc.id
-                    val base64Str = mediaMap[docId] ?: doc.getString("mediaBase64")
-                    val type = doc.getString("mediaType") ?: "photo"
-                    var resolvedMediaUri = ""
-
-                    if (!base64Str.isNullOrBlank()) {
-                        try {
-                            val decodedBytes = Base64.decode(base64Str, Base64.DEFAULT)
-                            val ext = if (type == "video") "mp4" else "jpg"
-                            val cacheFile = File(context.cacheDir, "listing_$docId.$ext")
-                            cacheFile.writeBytes(decodedBytes)
-                            resolvedMediaUri = cacheFile.absolutePath
-                        } catch (e: Exception) {
-                            Log.e("ListingStore", "Failed to decode listing media Base64", e)
-                        }
+            if (!base64Str.isNullOrBlank()) {
+                try {
+                    val decodedBytes = Base64.decode(base64Str, Base64.DEFAULT)
+                    val ext = if (type == "video") "mp4" else "jpg"
+                    val cacheFile = File(context.cacheDir, "listing_$docId.$ext")
+                    if (!cacheFile.exists()) {
+                        cacheFile.writeBytes(decodedBytes)
                     }
-
-                    Listing(
-                        id = docId,
-                        title = doc.getString("title") ?: "",
-                        description = doc.getString("description") ?: "",
-                        price = doc.getString("price") ?: "",
-                        category = doc.getString("category") ?: "",
-                        distance = doc.getString("distance") ?: "",
-                        ownerId = doc.getString("ownerId") ?: "",
-                        createdAt = doc.getLong("createdAt") ?: 0L,
-                        mediaUri = resolvedMediaUri.ifBlank { null },
-                        mediaType = type.ifBlank { null },
-                        isSold = doc.getBoolean("isSold") ?: false,
-                        location = doc.getString("location") ?: ""
-                    )
-                }.sortedByDescending { it.createdAt }
-
-                onResult(list)
+                    resolvedMediaUri = cacheFile.absolutePath
+                } catch (e: Exception) {
+                    Log.e("ListingStore", "Failed to decode listing media Base64", e)
+                }
             }
-            .addOnFailureListener {
-                val list = documents.map { doc ->
-                    val docId = doc.id
-                    Listing(
-                        id = docId,
-                        title = doc.getString("title") ?: "",
-                        description = doc.getString("description") ?: "",
-                        price = doc.getString("price") ?: "",
-                        category = doc.getString("category") ?: "",
-                        distance = doc.getString("distance") ?: "",
-                        ownerId = doc.getString("ownerId") ?: "",
-                        createdAt = doc.getLong("createdAt") ?: 0L,
-                        mediaUri = null,
-                        mediaType = doc.getString("mediaType"),
-                        isSold = doc.getBoolean("isSold") ?: false,
-                        location = doc.getString("location") ?: ""
-                    )
-                }.sortedByDescending { it.createdAt }
-                onResult(list)
-            }
+
+            Listing(
+                id = docId,
+                title = doc.getString("title") ?: "",
+                description = doc.getString("description") ?: "",
+                price = doc.getString("price") ?: "",
+                category = doc.getString("category") ?: "",
+                distance = doc.getString("distance") ?: "",
+                ownerId = doc.getString("ownerId") ?: "",
+                createdAt = doc.getLong("createdAt") ?: 0L,
+                mediaUri = resolvedMediaUri.ifBlank { null },
+                mediaType = type.ifBlank { null },
+                isSold = doc.getBoolean("isSold") ?: false,
+                location = doc.getString("location") ?: "",
+                mediaBase64 = base64Str
+            )
+        }.sortedByDescending { it.createdAt }
+
+        onResult(list)
     }
 
     fun loadAll(context: Context, onResult: (List<Listing>) -> Unit) {
