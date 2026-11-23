@@ -1,10 +1,16 @@
 package com.example.sofe4640ufinalproject
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.webkit.MimeTypeMap
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -16,11 +22,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.doOnTextChanged
 import com.bumptech.glide.Glide
 import java.io.File
+import java.util.Locale
 
 class postCreation : AppCompatActivity() {
 
@@ -66,10 +75,20 @@ class postCreation : AppCompatActivity() {
         val etDescription = findViewById<EditText>(R.id.etDescription)
         val etPrice = findViewById<EditText>(R.id.etPrice)
         val etCategory = findViewById<EditText>(R.id.etCategory)
+        val etLocation = findViewById<AutoCompleteTextView>(R.id.etLocation)
         val btnSubmit = findViewById<Button>(R.id.btnSubmitListing)
         previewContainer = findViewById(R.id.previewContainer)
         ivPreview = findViewById(R.id.ivPreview)
         tvVideoBadge = findViewById(R.id.tvVideoBadge)
+
+        etLocation.doOnTextChanged { text, _, _, _ ->
+            val q = text?.toString()?.trim() ?: ""
+            if (q.length >= 3) {
+                searchAddresses(etLocation, q)
+            }
+        }
+
+        autoFillLocation()
 
         findViewById<Button>(R.id.btnTakePhoto).setOnClickListener {
             pendingUri = newMediaUri("jpg")
@@ -99,6 +118,7 @@ class postCreation : AppCompatActivity() {
                     etDescription.text.toString().trim(),
                     etPrice.text.toString().trim(),
                     etCategory.text.toString().trim(),
+                    etLocation.text.toString().trim(),
                     mediaUri?.toString(),
                     mediaType
                 ) { success ->
@@ -116,15 +136,22 @@ class postCreation : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnMessages).setOnClickListener {
             startActivity(Intent(this, Messages::class.java))
+            finish()
         }
         findViewById<Button>(R.id.btnMyListings).setOnClickListener {
             startActivity(Intent(this, myListings::class.java))
+            finish()
         }
         findViewById<Button>(R.id.btnHome).setOnClickListener {
             startActivity(Intent(this, Homepage::class.java))
+            finish()
+        }
+        findViewById<Button>(R.id.btnMap).setOnClickListener {
+            startActivity(Intent(this, MapActivity::class.java))
+            finish()
         }
         findViewById<Button>(R.id.btnPost).setOnClickListener {
-            startActivity(Intent(this, postCreation::class.java))
+            // Already on Post Creation
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -153,7 +180,7 @@ class postCreation : AppCompatActivity() {
             file.outputStream().use { out -> input.copyTo(out) }
         }
         FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         null
     }
 
@@ -176,4 +203,85 @@ class postCreation : AppCompatActivity() {
     }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
+    private fun autoFillLocation() {
+        val etLocation = findViewById<AutoCompleteTextView>(R.id.etLocation)
+        if (etLocation.text.isNullOrBlank()) {
+            val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+            try {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                    val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                        ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+
+                    if (location != null) {
+                        val lat = location.latitude
+                        val lon = location.longitude
+                        val geocoder = Geocoder(this, Locale.getDefault())
+                        @Suppress("DEPRECATION")
+                        val addresses = geocoder.getFromLocation(lat, lon, 1)
+                        if (!addresses.isNullOrEmpty()) {
+                            val addr = addresses[0]
+                            val line = addr.getAddressLine(0)
+                            if (line != null) {
+                                etLocation.setText(line)
+                            } else {
+                                val city = addr.locality ?: addr.subAdminArea ?: addr.adminArea ?: ""
+                                val state = addr.adminArea ?: ""
+                                val locStr = if (state.isNotEmpty() && city != state) "$city, $state" else city
+                                etLocation.setText(locStr)
+                            }
+                        } else {
+                            etLocation.setText(String.format(Locale.getDefault(), "%.4f, %.4f", lat, lon))
+                        }
+                    } else {
+                        requestLocationPermission()
+                    }
+                } else {
+                    requestLocationPermission()
+                }
+            } catch (_: Exception) {
+                // fallback
+            }
+        }
+    }
+
+    private fun searchAddresses(autoComplete: AutoCompleteTextView, query: String) {
+        Thread {
+            try {
+                val geocoder = Geocoder(this, Locale.getDefault())
+                @Suppress("DEPRECATION")
+                val addresses = geocoder.getFromLocationName(query, 5)
+                val suggestions = addresses?.mapNotNull { addr ->
+                    addr.getAddressLine(0)
+                } ?: emptyList()
+
+                runOnUiThread {
+                    if (suggestions.isNotEmpty()) {
+                        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, suggestions)
+                        autoComplete.setAdapter(adapter)
+                        autoComplete.showDropDown()
+                    }
+                }
+            } catch (_: Exception) {
+                // ignore
+            }
+        }.start()
+    }
+
+    private fun requestLocationPermission() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+            1001
+        )
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            autoFillLocation()
+        }
+    }
 }

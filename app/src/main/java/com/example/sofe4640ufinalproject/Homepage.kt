@@ -1,12 +1,16 @@
 package com.example.sofe4640ufinalproject
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doOnTextChanged
@@ -23,6 +27,8 @@ class Homepage : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_homepage)
+
+        requestLocationPermissions()
 
         adapter = ListingAdapter(emptyList())
         val rv = findViewById<RecyclerView>(R.id.rvListings)
@@ -43,6 +49,9 @@ class Homepage : AppCompatActivity() {
         }
         findViewById<Button>(R.id.btnHome).setOnClickListener {
             startActivity(Intent(this, Homepage::class.java))
+        }
+        findViewById<Button>(R.id.btnMap).setOnClickListener {
+            startActivity(Intent(this, MapActivity::class.java))
         }
         findViewById<Button>(R.id.btnPost).setOnClickListener {
             startActivity(Intent(this, postCreation::class.java))
@@ -72,5 +81,15 @@ class Homepage : AppCompatActivity() {
                         it.category.contains(q, ignoreCase = true)
             }
         )
+    }
+
+    private fun requestLocationPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                2002
+            )
+        }
     }
 }

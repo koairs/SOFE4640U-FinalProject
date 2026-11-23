@@ -32,6 +32,7 @@ class ListingDetailActivity : AppCompatActivity() {
     private lateinit var currentDesc: String
     private lateinit var currentPrice: String
     private lateinit var currentCategory: String
+    private var currentLocation: String = ""
     private var isSold: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +51,7 @@ class ListingDetailActivity : AppCompatActivity() {
         currentDesc = intent.getStringExtra("description") ?: ""
         currentPrice = intent.getStringExtra("price") ?: ""
         currentCategory = intent.getStringExtra("category") ?: ""
+        currentLocation = intent.getStringExtra("location") ?: ""
         isSold = intent.getBooleanExtra("isSold", false)
         val mediaUriStr = intent.getStringExtra("mediaUri")
         val mediaType = intent.getStringExtra("mediaType")
@@ -60,6 +62,7 @@ class ListingDetailActivity : AppCompatActivity() {
         val tvDescription = findViewById<TextView>(R.id.tvDetailDescription)
         val tvPrice = findViewById<TextView>(R.id.tvDetailPrice)
         val tvCategory = findViewById<TextView>(R.id.tvDetailCategory)
+        val tvLocation = findViewById<TextView>(R.id.tvDetailLocation)
         val ivDetail = findViewById<ImageView>(R.id.ivDetail)
         val vvDetail = findViewById<VideoView>(R.id.vvDetail)
 
@@ -67,6 +70,8 @@ class ListingDetailActivity : AppCompatActivity() {
         tvDescription.text = currentDesc.ifBlank { "No description provided." }
         tvPrice.text = currentPrice
         tvCategory.text = currentCategory
+        val distanceText = LocationHelper.calculateDistance(this, currentLocation)
+        tvLocation.text = if (currentLocation.isNotBlank()) "$currentLocation • $distanceText" else distanceText
 
         if (!mediaUriStr.isNullOrBlank()) {
             val uri = Uri.parse(mediaUriStr)
@@ -208,6 +213,7 @@ class ListingDetailActivity : AppCompatActivity() {
         val etDesc = EditText(this).apply { setText(currentDesc); hint = "Description" }
         val etPrice = EditText(this).apply { setText(currentPrice); hint = "Price" }
         val etCat = EditText(this).apply { setText(currentCategory); hint = "Category" }
+        val etLoc = EditText(this).apply { setText(currentLocation); hint = "Location" }
 
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -216,6 +222,7 @@ class ListingDetailActivity : AppCompatActivity() {
             addView(etDesc)
             addView(etPrice)
             addView(etCat)
+            addView(etLoc)
         }
 
         AlertDialog.Builder(this)
@@ -226,14 +233,16 @@ class ListingDetailActivity : AppCompatActivity() {
                 val newDesc = etDesc.text.toString().trim()
                 val newPrice = etPrice.text.toString().trim()
                 val newCat = etCat.text.toString().trim()
+                val newLoc = etLoc.text.toString().trim()
                 if (newTitle.isNotEmpty() && newPrice.isNotEmpty() && newCat.isNotEmpty()) {
-                    ListingStore.update(this, listingId, newTitle, newDesc, newPrice, newCat) { success ->
+                    ListingStore.update(this, listingId, newTitle, newDesc, newPrice, newCat, newLoc) { success ->
                         Toast.makeText(this, if (success) "Listing updated" else "Update failed", Toast.LENGTH_SHORT).show()
                         if (success) {
                             currentTitle = newTitle
                             currentDesc = newDesc
                             currentPrice = newPrice
                             currentCategory = newCat
+                            currentLocation = newLoc
                             findViewById<TextView>(R.id.tvDetailTitle).text = newTitle
                             findViewById<TextView>(R.id.tvDetailDescription).text = newDesc.ifBlank { "No description provided." }
                             findViewById<TextView>(R.id.tvDetailPrice).text = newPrice

@@ -38,7 +38,8 @@ class ListingAdapter(private var items: List<Listing>) :
 
         RatingStore.summary(holder.itemView.context, item.ownerId) { summary ->
             val rating = RatingStore.label(summary)
-            holder.meta.text = "${item.category} • ${item.distance} • $rating"
+            val distanceStr = LocationHelper.calculateDistance(holder.itemView.context, item.location)
+            holder.meta.text = "${item.category} • $distanceStr • $rating"
         }
 
         if (item.mediaUri != null) {
@@ -74,6 +75,7 @@ class ListingAdapter(private var items: List<Listing>) :
                     putExtra("mediaType", item.mediaType)
                     putExtra("ownerId", item.ownerId)
                     putExtra("isSold", item.isSold)
+                    putExtra("location", item.location)
                 }
             )
         }

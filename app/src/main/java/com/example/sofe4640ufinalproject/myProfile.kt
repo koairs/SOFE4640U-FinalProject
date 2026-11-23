@@ -84,6 +84,9 @@ class myProfile : AppCompatActivity() {
         findViewById<Button>(R.id.btnHome).setOnClickListener {
             startActivity(Intent(this, Homepage::class.java))
         }
+        findViewById<Button>(R.id.btnMap).setOnClickListener {
+            startActivity(Intent(this, MapActivity::class.java))
+        }
         findViewById<Button>(R.id.btnPost).setOnClickListener {
             startActivity(Intent(this, postCreation::class.java))
         }

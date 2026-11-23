@@ -19,6 +19,7 @@ object ListingStore {
         description: String,
         price: String,
         category: String,
+        location: String,
         mediaUri: String?,
         mediaType: String?,
         onDone: (Boolean) -> Unit
@@ -28,6 +29,7 @@ object ListingStore {
             "description" to description,
             "price" to if (price.startsWith("$")) price else "\$$price",
             "category" to category,
+            "location" to location,
             "distance" to "Nearby",
             "ownerId" to currentUserId(),
             "createdAt" to System.currentTimeMillis(),
@@ -54,13 +56,15 @@ object ListingStore {
         description: String,
         price: String,
         category: String,
+        location: String,
         onDone: (Boolean) -> Unit
     ) {
         val updates = mapOf(
             "title" to title,
             "description" to description,
             "price" to if (price.startsWith("$")) price else "\$$price",
-            "category" to category
+            "category" to category,
+            "location" to location
         )
         Firebase.firestore.collection("listings").document(listingId)
             .update(updates)
@@ -122,7 +126,8 @@ object ListingStore {
                         createdAt = doc.getLong("createdAt") ?: 0L,
                         mediaUri = doc.getString("mediaUri")?.ifBlank { null },
                         mediaType = doc.getString("mediaType")?.ifBlank { null },
-                        isSold = doc.getBoolean("isSold") ?: false
+                        isSold = doc.getBoolean("isSold") ?: false,
+                        location = doc.getString("location") ?: ""
                     )
                 }.sortedByDescending { it.createdAt }
                 onResult(list)
@@ -154,7 +159,8 @@ object ListingStore {
                         createdAt = doc.getLong("createdAt") ?: 0L,
                         mediaUri = doc.getString("mediaUri")?.ifBlank { null },
                         mediaType = doc.getString("mediaType")?.ifBlank { null },
-                        isSold = doc.getBoolean("isSold") ?: false
+                        isSold = doc.getBoolean("isSold") ?: false,
+                        location = doc.getString("location") ?: ""
                     )
                 }.sortedByDescending { it.createdAt }
                 onResult(list)
