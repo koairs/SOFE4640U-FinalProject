@@ -1,18 +1,25 @@
 package com.example.sofe4640ufinalproject
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.media.MediaRecorder
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import java.io.File
 
 class ChatActivity : AppCompatActivity() {
 
@@ -21,6 +28,20 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var adapter: ChatAdapter
     private lateinit var rvMessages: RecyclerView
     private lateinit var etInput: EditText
+
+    private var mediaRecorder: MediaRecorder? = null
+    private var recordedAudioFile: File? = null
+    private var isRecording = false
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            startRecording()
+        } else {
+            Toast.makeText(this, "Microphone permission required for voice chat", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +89,7 @@ class ChatActivity : AppCompatActivity() {
 
         etInput = findViewById(R.id.etMessageInput)
         val btnSend = findViewById<MaterialButton>(R.id.btnSendMessage)
+        val btnMic = findViewById<MaterialButton>(R.id.btnMic)
 
         btnSend.setOnClickListener {
             val text = etInput.text.toString().trim()
@@ -83,7 +105,78 @@ class ChatActivity : AppCompatActivity() {
             }
         }
 
+        btnMic.setOnClickListener {
+            if (isRecording) {
+                stopAndSendRecording()
+            } else {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                    startRecording()
+                } else {
+                    requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                }
+            }
+        }
+
         loadMessages()
+    }
+
+    private fun startRecording() {
+        try {
+            recordedAudioFile = File(filesDir, "voice_${System.currentTimeMillis()}.3gp")
+            val recorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                MediaRecorder(this)
+            } else {
+                @Suppress("DEPRECATION")
+                MediaRecorder()
+            }
+            recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+            recorder.setOutputFile(recordedAudioFile!!.absolutePath)
+            recorder.prepare()
+            recorder.start()
+            mediaRecorder = recorder
+            isRecording = true
+            Toast.makeText(this, "Recording voice message... Tap mic again to send", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed to start recording", Toast.LENGTH_SHORT).show()
+            isRecording = false
+        }
+    }
+
+    private fun stopAndSendRecording() {
+        try {
+            mediaRecorder?.apply {
+                stop()
+                release()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        mediaRecorder = null
+        isRecording = false
+
+        val path = recordedAudioFile?.absolutePath
+        if (path != null && File(path).exists()) {
+            MessageStore.sendMessage(
+                context = this,
+                receiverId = otherUser,
+                itemTitle = itemTitle,
+                messageText = "🎤 Voice Message",
+                audioUri = path,
+                isAudio = true
+            ) { success ->
+                if (success) {
+                    Toast.makeText(this, "Voice message sent", Toast.LENGTH_SHORT).show()
+                    loadMessages()
+                } else {
+                    Toast.makeText(this, "Failed to send voice message", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            Toast.makeText(this, "No audio recorded", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onResume() {

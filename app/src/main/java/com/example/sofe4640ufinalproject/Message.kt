@@ -6,7 +6,9 @@ data class Message(
     val receiverId: String,
     val itemTitle: String = "",
     val messageText: String,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val audioUri: String? = null,
+    val isAudio: Boolean = false
 )
 
 data class Conversation(

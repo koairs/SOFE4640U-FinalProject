@@ -19,6 +19,8 @@ object MessageStore {
         receiverId: String,
         itemTitle: String,
         messageText: String,
+        audioUri: String? = null,
+        isAudio: Boolean = false,
         onDone: (Boolean) -> Unit
     ) {
         val senderId = currentUserId()
@@ -27,7 +29,9 @@ object MessageStore {
             "receiverId" to receiverId,
             "itemTitle" to itemTitle,
             "messageText" to messageText,
-            "timestamp" to System.currentTimeMillis()
+            "timestamp" to System.currentTimeMillis(),
+            "audioUri" to (audioUri ?: ""),
+            "isAudio" to isAudio
         )
         Firebase.firestore.collection("messages")
             .add(data)
@@ -61,7 +65,9 @@ object MessageStore {
                             receiverId = receiver,
                             itemTitle = doc.getString("itemTitle") ?: "",
                             messageText = doc.getString("messageText") ?: "",
-                            timestamp = doc.getLong("timestamp") ?: 0L
+                            timestamp = doc.getLong("timestamp") ?: 0L,
+                            audioUri = doc.getString("audioUri")?.ifBlank { null },
+                            isAudio = doc.getBoolean("isAudio") ?: false
                         )
                     } else {
                         null

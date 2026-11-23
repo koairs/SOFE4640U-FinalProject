@@ -1,9 +1,11 @@
 package com.example.sofe4640ufinalproject
 
+import android.media.MediaPlayer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -41,13 +43,35 @@ class ChatAdapter(
         val isCB = ColorBlindHelper.isColorBlindMode(holder.itemView.context)
         ColorBlindHelper.recolorViewTree(holder.itemView, isCB)
 
+        val displayText = if (msg.isAudio) "🎤 Voice Message (Tap to Play)" else msg.messageText
+
+        val clickListener = View.OnClickListener {
+            if (msg.isAudio && !msg.audioUri.isNullOrBlank()) {
+                val ctx = it.context
+                try {
+                    val mp = MediaPlayer().apply {
+                        setDataSource(msg.audioUri)
+                        prepare()
+                        start()
+                    }
+                    mp.setOnCompletionListener { it.release() }
+                    Toast.makeText(ctx, "Playing voice message...", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(ctx, "Audio file not found or cannot play", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         if (holder is SentVH) {
-            holder.text.text = msg.messageText
+            holder.text.text = displayText
             holder.time.text = timeStr
+            holder.itemView.setOnClickListener(clickListener)
         } else if (holder is ReceivedVH) {
             holder.sender.text = msg.senderId
-            holder.text.text = msg.messageText
+            holder.text.text = displayText
             holder.time.text = timeStr
+            holder.itemView.setOnClickListener(clickListener)
         }
     }
 
