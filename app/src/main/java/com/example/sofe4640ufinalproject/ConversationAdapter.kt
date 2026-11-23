@@ -54,9 +54,6 @@ class ConversationAdapter(
             }
         }
 
-        val isCB = ColorBlindHelper.isColorBlindMode(holder.itemView.context)
-        ColorBlindHelper.recolorViewTree(holder.itemView, isCB)
-
         holder.ivAvatar.setOnClickListener {
             val ctx = it.context
             val intent = Intent(ctx, Profile::class.java).apply {
