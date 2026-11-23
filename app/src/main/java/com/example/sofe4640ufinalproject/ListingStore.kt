@@ -1,6 +1,8 @@
 package com.example.sofe4640ufinalproject
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
@@ -8,13 +10,63 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
 
 object ListingStore {
 
     fun currentUserId(): String {
         val user = FirebaseAuth.getInstance().currentUser
         return user?.email?.ifBlank { null } ?: user?.uid ?: "guest"
+    }
+
+    private fun compressImageToBase64(context: Context, uri: Uri): String {
+        try {
+            val inputStream = when (uri.scheme) {
+                "file" -> FileInputStream(uri.path ?: return "")
+                else -> try {
+                    context.contentResolver.openInputStream(uri)
+                } catch (_: Exception) {
+                    null
+                } ?: try {
+                    FileInputStream(uri.path ?: return "")
+                } catch (_: Exception) {
+                    return ""
+                }
+            }
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream.close()
+            if (bitmap == null) return ""
+
+            val maxSize = 800
+            val width = bitmap.width
+            val height = bitmap.height
+            val ratio = width.toFloat() / height.toFloat()
+            val newWidth: Int
+            val newHeight: Int
+            if (width > height) {
+                newWidth = maxSize
+                newHeight = (maxSize / ratio).toInt()
+            } else {
+                newHeight = maxSize
+                newWidth = (maxSize * ratio).toInt()
+            }
+
+            val resizedBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+            val outputStream = ByteArrayOutputStream()
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream)
+            val bytes = outputStream.toByteArray()
+            outputStream.close()
+            if (bitmap != resizedBitmap) {
+                bitmap.recycle()
+            }
+            resizedBitmap.recycle()
+            return Base64.encodeToString(bytes, Base64.DEFAULT)
+        } catch (e: Exception) {
+            Log.e("ListingStore", "Image compression failed", e)
+            return ""
+        }
     }
 
     fun add(
@@ -32,14 +84,19 @@ object ListingStore {
         if (!mediaUri.isNullOrBlank()) {
             try {
                 val uri = Uri.parse(mediaUri)
-                val inputStream = context.contentResolver.openInputStream(uri)
-                val bytes = inputStream?.readBytes()
-                inputStream?.close()
-                if (bytes != null) {
+                if (mediaType == "video") {
+                    val inputStream = when (uri.scheme) {
+                        "file" -> FileInputStream(uri.path ?: "")
+                        else -> context.contentResolver.openInputStream(uri) ?: FileInputStream(uri.path ?: "")
+                    }
+                    val bytes = inputStream.readBytes()
+                    inputStream.close()
                     mediaBase64 = Base64.encodeToString(bytes, Base64.DEFAULT)
+                } else {
+                    mediaBase64 = compressImageToBase64(context, uri)
                 }
             } catch (e: Exception) {
-                Log.e("ListingStore", "Failed to encode media to Base64", e)
+                Log.e("ListingStore", "Failed to encode media", e)
             }
         }
 
