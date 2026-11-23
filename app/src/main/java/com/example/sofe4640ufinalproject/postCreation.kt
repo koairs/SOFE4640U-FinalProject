@@ -14,6 +14,7 @@ import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ScrollView
 import android.widget.TextView
@@ -154,6 +155,10 @@ class postCreation : AppCompatActivity() {
             // Already on Post Creation
         }
 
+        findViewById<ImageButton>(R.id.profileButton)?.setOnClickListener {
+            startActivity(Intent(this, myProfile::class.java))
+        }
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -164,6 +169,18 @@ class postCreation : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         ColorBlindHelper.apply(this)
+        loadHeaderProfilePhoto()
+    }
+
+    private fun loadHeaderProfilePhoto() {
+        val btn = findViewById<ImageButton>(R.id.profileButton) ?: return
+        ProfileStore.getPhoto(this, ListingStore.currentUserId()) { path ->
+            if (path != null && File(path).exists()) {
+                Glide.with(this).load(File(path)).centerCrop().into(btn)
+            } else {
+                btn.setImageResource(R.drawable.profile)
+            }
+        }
     }
 
     private fun newMediaFile(ext: String): File {

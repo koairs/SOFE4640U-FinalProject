@@ -5,12 +5,14 @@ import android.location.Geocoder
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doOnTextChanged
+import com.bumptech.glide.Glide
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.XYTileSource
@@ -19,6 +21,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.infowindow.InfoWindow
+import java.io.File
 import java.util.Locale
 
 class MapActivity : AppCompatActivity() {
@@ -61,6 +64,10 @@ class MapActivity : AppCompatActivity() {
         etMapSearch = findViewById(R.id.etMapSearch)
         etMapSearch.doOnTextChanged { _, _, _, _ -> loadListingsOnMap() }
 
+        findViewById<ImageButton>(R.id.profileButton)?.setOnClickListener {
+            startActivity(Intent(this, myProfile::class.java))
+        }
+
         setupBottomNav()
         loadListingsOnMap()
     }
@@ -68,8 +75,20 @@ class MapActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         ColorBlindHelper.apply(this)
+        loadHeaderProfilePhoto()
         mapView.onResume()
         loadListingsOnMap()
+    }
+
+    private fun loadHeaderProfilePhoto() {
+        val btn = findViewById<ImageButton>(R.id.profileButton) ?: return
+        ProfileStore.getPhoto(this, ListingStore.currentUserId()) { path ->
+            if (path != null && File(path).exists()) {
+                Glide.with(this).load(File(path)).centerCrop().into(btn)
+            } else {
+                btn.setImageResource(R.drawable.profile)
+            }
+        }
     }
 
     override fun onPause() {

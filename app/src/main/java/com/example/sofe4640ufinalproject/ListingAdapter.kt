@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import java.io.File
 
 class ListingAdapter(private var items: List<Listing>) :
     RecyclerView.Adapter<ListingAdapter.VH>() {
@@ -19,7 +20,8 @@ class ListingAdapter(private var items: List<Listing>) :
         val meta: TextView = view.findViewById(R.id.tvMeta)
         val thumb: ImageView = view.findViewById(R.id.ivThumb)
         val play: TextView = view.findViewById(R.id.tvPlay)
-        val soldBadge: TextView = view.findViewById(R.id.tvSoldBadge)
+        val ownerAvatar: ImageView = view.findViewById(R.id.ivOwnerAvatar)
+        val soldBadge: TextView = view.findViewById(R.id.soldBadge)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -38,8 +40,24 @@ class ListingAdapter(private var items: List<Listing>) :
 
         RatingStore.summary(holder.itemView.context, item.ownerId) { summary ->
             val rating = RatingStore.label(summary)
-            val distanceStr = LocationHelper.calculateDistance(holder.itemView.context, item.location)
-            holder.meta.text = "${item.category} • $distanceStr • $rating"
+            holder.meta.text = "${item.category} • ${item.distance} • $rating"
+        }
+
+        ProfileStore.getPhoto(holder.itemView.context, item.ownerId) { path ->
+            if (path != null && File(path).exists()) {
+                Glide.with(holder.itemView.context).load(File(path)).centerCrop().into(holder.ownerAvatar)
+            } else {
+                holder.ownerAvatar.setImageResource(R.drawable.profile)
+            }
+        }
+
+        holder.ownerAvatar.setOnClickListener {
+            val ctx = it.context
+            ctx.startActivity(
+                Intent(ctx, Profile::class.java).apply {
+                    putExtra("userId", item.ownerId)
+                }
+            )
         }
 
         if (item.mediaUri != null) {
@@ -74,8 +92,6 @@ class ListingAdapter(private var items: List<Listing>) :
                     putExtra("mediaUri", item.mediaUri)
                     putExtra("mediaType", item.mediaType)
                     putExtra("ownerId", item.ownerId)
-                    putExtra("isSold", item.isSold)
-                    putExtra("location", item.location)
                 }
             )
         }

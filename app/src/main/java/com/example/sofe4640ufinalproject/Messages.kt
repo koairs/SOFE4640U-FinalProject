@@ -12,13 +12,13 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.ChipGroup
+import com.bumptech.glide.Glide
+import java.io.File
 
 class Messages : AppCompatActivity() {
 
     private lateinit var adapter: ConversationAdapter
     private lateinit var etSearch: EditText
-    private lateinit var cgMessageFilters: ChipGroup
     private var allConversations: List<Conversation> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,7 +29,6 @@ class Messages : AppCompatActivity() {
         val rv = findViewById<RecyclerView>(R.id.rvMessages)
         rv.layoutManager = LinearLayoutManager(this)
         adapter = ConversationAdapter(emptyList()) { conv ->
-            MessageStore.markMessagesAsRead(this, conv.otherUser)
             val intent = Intent(this, ChatActivity::class.java).apply {
                 putExtra("otherUser", conv.otherUser)
                 putExtra("itemTitle", conv.itemTitle)
@@ -40,9 +39,6 @@ class Messages : AppCompatActivity() {
 
         etSearch = findViewById(R.id.etSearchMessages)
         etSearch.doOnTextChanged { _, _, _, _ -> applyFilter() }
-
-        cgMessageFilters = findViewById(R.id.cgMessageFilters)
-        cgMessageFilters.setOnCheckedStateChangeListener { _, _ -> applyFilter() }
 
         findViewById<ImageButton>(R.id.profileButton).setOnClickListener {
             startActivity(Intent(this, myProfile::class.java))
@@ -73,29 +69,31 @@ class Messages : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         ColorBlindHelper.apply(this)
+        loadHeaderProfilePhoto()
         MessageStore.getRecentConversations(this) { list ->
             allConversations = list
             applyFilter()
         }
     }
 
+    private fun loadHeaderProfilePhoto() {
+        val btn = findViewById<ImageButton>(R.id.profileButton) ?: return
+        ProfileStore.getPhoto(this, ListingStore.currentUserId()) { path ->
+            if (path != null && File(path).exists()) {
+                Glide.with(this).load(File(path)).centerCrop().into(btn)
+            } else {
+                btn.setImageResource(R.drawable.profile)
+            }
+        }
+    }
+
     private fun applyFilter() {
         val q = etSearch.text.toString().trim()
-        val checkedChipId = cgMessageFilters.checkedChipId
-
         adapter.update(
-            allConversations.filter { conv ->
-                val matchesSearch = conv.otherUser.contains(q, ignoreCase = true) ||
-                        conv.lastMessage.contains(q, ignoreCase = true) ||
-                        conv.itemTitle.contains(q, ignoreCase = true)
-
-                val matchesChip = when (checkedChipId) {
-                    R.id.chipBuying -> !conv.isSelling
-                    R.id.chipSelling -> conv.isSelling
-                    else -> true
-                }
-
-                matchesSearch && matchesChip
+            allConversations.filter {
+                it.otherUser.contains(q, ignoreCase = true) ||
+                        it.lastMessage.contains(q, ignoreCase = true) ||
+                        it.itemTitle.contains(q, ignoreCase = true)
             }
         )
     }

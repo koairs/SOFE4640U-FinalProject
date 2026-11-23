@@ -16,6 +16,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import java.io.File
 
 class Homepage : AppCompatActivity() {
 
@@ -67,9 +69,21 @@ class Homepage : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         ColorBlindHelper.apply(this)
+        loadHeaderProfilePhoto()
         ListingStore.loadAll(this) {
             allListings = it
             applyFilter()
+        }
+    }
+
+    private fun loadHeaderProfilePhoto() {
+        val btn = findViewById<ImageButton>(R.id.profileButton) ?: return
+        ProfileStore.getPhoto(this, ListingStore.currentUserId()) { path ->
+            if (path != null && File(path).exists()) {
+                Glide.with(this).load(File(path)).centerCrop().into(btn)
+            } else {
+                btn.setImageResource(R.drawable.profile)
+            }
         }
     }
 

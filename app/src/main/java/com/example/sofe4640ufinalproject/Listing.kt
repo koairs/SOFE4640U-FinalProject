@@ -12,5 +12,6 @@ data class Listing(
     val mediaUri: String? = null,
     val mediaType: String? = null,
     val isSold: Boolean = false,
-    val location: String = ""
+    val location: String = "",
+    val mediaBase64: String? = null
 )
