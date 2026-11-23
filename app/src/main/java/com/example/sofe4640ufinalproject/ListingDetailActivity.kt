@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -55,6 +56,7 @@ class ListingDetailActivity : AppCompatActivity() {
         currentLocation = intent.getStringExtra("location") ?: ""
         isSold = intent.getBooleanExtra("isSold", false)
         val mediaUriStr = intent.getStringExtra("mediaUri")
+        val mediaBase64 = intent.getStringExtra("mediaBase64")
         val mediaType = intent.getStringExtra("mediaType")
         ownerId = intent.getStringExtra("ownerId") ?: "Seller"
         me = ListingStore.currentUserId()
@@ -74,12 +76,30 @@ class ListingDetailActivity : AppCompatActivity() {
         val distanceText = LocationHelper.calculateDistance(this, currentLocation)
         tvLocation.text = if (currentLocation.isNotBlank()) "$currentLocation • $distanceText" else distanceText
 
+        var imageLoadTarget: Any? = null
         if (!mediaUriStr.isNullOrBlank()) {
-            val uri = Uri.parse(mediaUriStr)
+            val file = File(mediaUriStr)
+            if (file.exists()) {
+                imageLoadTarget = file
+            } else {
+                imageLoadTarget = Uri.parse(mediaUriStr)
+            }
+        } else if (!mediaBase64.isNullOrBlank()) {
+            try {
+                val decoded = Base64.decode(mediaBase64, Base64.DEFAULT)
+                val cacheFile = File(cacheDir, "detail_media_$listingId.jpg")
+                if (!cacheFile.exists() || cacheFile.length() == 0L) {
+                    cacheFile.writeBytes(decoded)
+                }
+                imageLoadTarget = cacheFile
+            } catch (_: Exception) {}
+        }
+
+        if (imageLoadTarget != null) {
             if (mediaType == "video") {
                 ivDetail.visibility = View.GONE
                 vvDetail.visibility = View.VISIBLE
-                vvDetail.setVideoURI(uri)
+                vvDetail.setVideoURI(if (imageLoadTarget is File) Uri.fromFile(imageLoadTarget) else imageLoadTarget as Uri)
                 val mediaController = MediaController(this)
                 mediaController.setAnchorView(vvDetail)
                 vvDetail.setMediaController(mediaController)
@@ -91,7 +111,11 @@ class ListingDetailActivity : AppCompatActivity() {
             } else {
                 vvDetail.visibility = View.GONE
                 ivDetail.visibility = View.VISIBLE
-                Glide.with(this).load(uri).centerCrop().into(ivDetail)
+                Glide.with(this).load(imageLoadTarget)
+                    .centerCrop()
+                    .placeholder(R.drawable.profile)
+                    .error(R.drawable.profile)
+                    .into(ivDetail)
             }
         } else {
             vvDetail.visibility = View.GONE
@@ -233,7 +257,7 @@ class ListingDetailActivity : AppCompatActivity() {
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Edit Listing")
+            .setTitle("Edit Listing Detail")
             .setView(layout)
             .setPositiveButton("Save") { _, _ ->
                 val newTitle = etTitle.text.toString().trim()

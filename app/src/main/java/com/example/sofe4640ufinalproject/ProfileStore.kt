@@ -7,6 +7,7 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -14,27 +15,63 @@ import java.io.File
 object ProfileStore {
 
     fun getPhoto(context: Context, userId: String, onResult: (String?) -> Unit) {
-        Firebase.firestore.collection("profiles").document(userId)
-            .get()
-            .addOnSuccessListener { doc ->
-                val base64Str = doc.getString("photoBase64")
-                if (!base64Str.isNullOrBlank()) {
-                    try {
-                        val decodedBytes = Base64.decode(base64Str, Base64.DEFAULT)
-                        val cacheFile = File(context.cacheDir, "avatar_${userId.hashCode()}.jpg")
-                        cacheFile.writeBytes(decodedBytes)
-                        onResult(cacheFile.absolutePath)
-                    } catch (e: Exception) {
-                        Log.e("ProfileStore", "Failed to decode avatar Base64", e)
-                        onResult(doc.getString("photoPath"))
+        if (userId.isBlank()) {
+            onResult(null)
+            return
+        }
+        val docRef = Firebase.firestore.collection("profiles").document(userId)
+        docRef.get().addOnSuccessListener { doc ->
+            if (doc != null && doc.exists()) {
+                parsePhotoDoc(context, userId, doc, onResult)
+            } else {
+                Firebase.firestore.collection("profiles")
+                    .whereEqualTo("userId", userId)
+                    .get()
+                    .addOnSuccessListener { queryResult ->
+                        if (queryResult != null && queryResult.documents.isNotEmpty()) {
+                            parsePhotoDoc(context, userId, queryResult.documents[0], onResult)
+                        } else {
+                            onResult(null)
+                        }
                     }
-                } else {
-                    onResult(doc.getString("photoPath"))
+                    .addOnFailureListener {
+                        onResult(null)
+                    }
+            }
+        }.addOnFailureListener {
+            Firebase.firestore.collection("profiles")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnSuccessListener { queryResult ->
+                    if (queryResult != null && queryResult.documents.isNotEmpty()) {
+                        parsePhotoDoc(context, userId, queryResult.documents[0], onResult)
+                    } else {
+                        onResult(null)
+                    }
                 }
+                .addOnFailureListener {
+                    onResult(null)
+                }
+        }
+    }
+
+    private fun parsePhotoDoc(context: Context, userId: String, doc: DocumentSnapshot, onResult: (String?) -> Unit) {
+        val base64Str = doc.getString("photoBase64")
+        if (!base64Str.isNullOrBlank()) {
+            try {
+                val decodedBytes = Base64.decode(base64Str, Base64.DEFAULT)
+                val cacheFile = File(context.cacheDir, "avatar_${userId.hashCode()}.jpg")
+                if (!cacheFile.exists() || cacheFile.length() == 0L) {
+                    cacheFile.writeBytes(decodedBytes)
+                }
+                onResult(cacheFile.absolutePath)
+            } catch (e: Exception) {
+                Log.e("ProfileStore", "Failed to decode avatar Base64", e)
+                onResult(doc.getString("photoPath"))
             }
-            .addOnFailureListener {
-                onResult(null)
-            }
+        } else {
+            onResult(doc.getString("photoPath"))
+        }
     }
 
     fun setPhoto(context: Context, userId: String, imageUri: Uri, onDone: (Boolean) -> Unit) {

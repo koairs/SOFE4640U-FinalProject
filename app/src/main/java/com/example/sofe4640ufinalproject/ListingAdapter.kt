@@ -1,7 +1,7 @@
 package com.example.sofe4640ufinalproject
 
 import android.content.Intent
-import android.net.Uri
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,12 +60,30 @@ class ListingAdapter(private var items: List<Listing>) :
             )
         }
 
-        if (item.mediaUri != null) {
-            Glide.with(holder.thumb).load(Uri.parse(item.mediaUri))
+        if (!item.mediaUri.isNullOrBlank()) {
+            val file = File(item.mediaUri)
+            val loadTarget = if (file.exists()) file else item.mediaUri
+            Glide.with(holder.thumb).load(loadTarget)
                 .centerCrop()
                 .placeholder(R.drawable.profile)
                 .error(R.drawable.profile)
                 .into(holder.thumb)
+            holder.play.visibility = if (item.mediaType == "video") View.VISIBLE else View.GONE
+        } else if (!item.mediaBase64.isNullOrBlank()) {
+            try {
+                val decoded = Base64.decode(item.mediaBase64, Base64.DEFAULT)
+                val cacheFile = File(holder.itemView.context.cacheDir, "listing_thumb_${item.id}.jpg")
+                if (!cacheFile.exists() || cacheFile.length() == 0L) {
+                    cacheFile.writeBytes(decoded)
+                }
+                Glide.with(holder.thumb).load(cacheFile)
+                    .centerCrop()
+                    .placeholder(R.drawable.profile)
+                    .error(R.drawable.profile)
+                    .into(holder.thumb)
+            } catch (_: Exception) {
+                holder.thumb.setImageResource(R.drawable.profile)
+            }
             holder.play.visibility = if (item.mediaType == "video") View.VISIBLE else View.GONE
         } else {
             holder.thumb.setImageResource(R.drawable.profile)
@@ -89,9 +107,12 @@ class ListingAdapter(private var items: List<Listing>) :
                     putExtra("description", item.description)
                     putExtra("price", item.price)
                     putExtra("category", item.category)
+                    putExtra("isSold", item.isSold)
                     putExtra("mediaUri", item.mediaUri)
                     putExtra("mediaType", item.mediaType)
+                    putExtra("mediaBase64", item.mediaBase64)
                     putExtra("ownerId", item.ownerId)
+                    putExtra("location", item.location)
                 }
             )
         }
