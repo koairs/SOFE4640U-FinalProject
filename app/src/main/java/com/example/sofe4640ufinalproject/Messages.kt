@@ -82,7 +82,7 @@ class Messages : AppCompatActivity() {
             if (path != null && File(path).exists()) {
                 Glide.with(this).load(File(path)).centerCrop().into(btn)
             } else {
-                btn.setImageResource(R.drawable.profile)
+                btn.setImageResource(R.drawable.ic_profile)
             }
         }
     }
