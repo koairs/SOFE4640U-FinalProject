@@ -94,7 +94,7 @@ object ColorBlindHelper {
         } else if (view is TextView) {
             val textColor = view.currentTextColor
             // Specific check for item & detail price tag views
-            if (view.id == R.id.tvPrice || view.id == R.id.tvDetailPrice) {
+            if (view.id == R.id.tvPrice || view.id == R.id.tvDetailPrice || view.id == R.id.tvItemTag || view.id == R.id.tvItemTitleTag) {
                 view.setTextColor(accentDark)
             } else if (textColor == COLOR_PRIMARY_STD || textColor == COLOR_PRIMARY_CB) {
                 view.setTextColor(primary)
@@ -112,6 +112,10 @@ object ColorBlindHelper {
         }
 
         if (view is MaterialCardView) {
+            val cardBg = view.cardBackgroundColor.defaultColor
+            if (cardBg == COLOR_PRIMARY_STD || cardBg == COLOR_PRIMARY_CB) {
+                view.setCardBackgroundColor(primary)
+            }
             val currentStroke = view.strokeColorStateList?.defaultColor ?: 0
             if (currentStroke == COLOR_ACCENT_STD || currentStroke == COLOR_ACCENT_CB) {
                 view.strokeColor = accent

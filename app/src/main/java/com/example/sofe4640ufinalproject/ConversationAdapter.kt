@@ -39,6 +39,9 @@ class ConversationAdapter(
         val timeStr = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault()).format(Date(item.timestamp))
         holder.tvTime.text = timeStr
 
+        val isCB = ColorBlindHelper.isColorBlindMode(holder.itemView.context)
+        ColorBlindHelper.recolorViewTree(holder.itemView, isCB)
+
         if (item.itemTitle.isNotBlank()) {
             holder.tvItemTag.visibility = View.VISIBLE
             holder.tvItemTag.text = "Re: ${item.itemTitle}"
