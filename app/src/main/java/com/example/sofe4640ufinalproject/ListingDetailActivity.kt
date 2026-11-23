@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.MediaController
 import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
@@ -79,8 +80,14 @@ class ListingDetailActivity : AppCompatActivity() {
                 ivDetail.visibility = View.GONE
                 vvDetail.visibility = View.VISIBLE
                 vvDetail.setVideoURI(uri)
-                vvDetail.setOnPreparedListener { mp -> mp.isLooping = true }
-                vvDetail.start()
+                val mediaController = MediaController(this)
+                mediaController.setAnchorView(vvDetail)
+                vvDetail.setMediaController(mediaController)
+                vvDetail.setOnPreparedListener { mp ->
+                    mp.isLooping = true
+                    vvDetail.start()
+                }
+                vvDetail.requestFocus()
             } else {
                 vvDetail.visibility = View.GONE
                 ivDetail.visibility = View.VISIBLE
